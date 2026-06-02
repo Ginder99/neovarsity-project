@@ -16,6 +16,8 @@ build/
 bin/
 !**/src/main/**/bin/
 !**/src/test/**/bin/
+/test.db.mv.db
+/test.db.trace.db
 
 ### IntelliJ IDEA ###
 .idea

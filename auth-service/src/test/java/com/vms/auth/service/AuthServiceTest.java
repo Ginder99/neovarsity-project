@@ -2,7 +2,9 @@ package com.vms.auth.service;
 
 import com.vms.auth.dto.AuthResponse;
 import com.vms.auth.dto.SignUpRequest;
+import com.vms.auth.repository.RefreshTokenRepository;
 import com.vms.auth.repository.UserRepository;
+import com.vms.auth.service.exceptions.EmailAlreadyInUseException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -20,8 +23,12 @@ class AuthServiceTest {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private RefreshTokenRepository refreshTokenRepository;
+
     @BeforeEach
     void setUp() {
+        refreshTokenRepository.deleteAll();
         userRepository.deleteAll();
     }
 
@@ -37,5 +44,19 @@ class AuthServiceTest {
         assertThat(response.accessToken()).isNotBlank();
         assertThat(response.refreshToken()).isNotBlank();
         assertThat(userRepository.findByEmail("jane@example.com")).isPresent();
+    }
+    @Test
+    void signupThrowsEmailExistsError() {
+        authService.signUp(new SignUpRequest(
+                "jane@example.com",
+                "S3cure!Pass",
+                "Jane Doe"
+        ));
+
+        assertThrows(EmailAlreadyInUseException.class, () -> authService.signUp(new SignUpRequest(
+                "jane@example.com",
+                "S3cure!Pass",
+                "Jane Doe"
+        )));
     }
 }
