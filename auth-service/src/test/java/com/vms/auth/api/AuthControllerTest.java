@@ -1,5 +1,6 @@
 package com.vms.auth.api;
 
+import com.vms.auth.dto.LoginRequest;
 import com.vms.auth.dto.SignUpRequest;
 import com.vms.auth.repository.RefreshTokenRepository;
 import com.vms.auth.repository.UserRepository;
@@ -75,6 +76,53 @@ class AuthControllerTest {
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.code", is("EMAIL_ALREADY_IN_USE")))
                 .andExpect(jsonPath("$.message", is("Email already in use: jane@example.com")));
+    }
+
+    @Test
+    void loginReturnsAccessToken() throws Exception {
+        SignUpRequest request = new SignUpRequest("jane@example.com", "S3cure!Pass", "Jane Doe");
+
+        mockMvc.perform(post("/api/v1/auth/signup")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated());
+        LoginRequest loginRequest = new LoginRequest("jane@example.com", "S3cure!Pass");
+        mockMvc.perform(post("/api/v1/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(loginRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.user.id", not(emptyString())))
+                .andExpect(jsonPath("$.user.name", is("Jane Doe")))
+                .andExpect(jsonPath("$.user.email", is("jane@example.com")))
+                .andExpect(jsonPath("$.user.created_at", notNullValue()))
+                .andExpect(jsonPath("$.access_token", not(emptyString())))
+                .andExpect(jsonPath("$.refresh_token", not(emptyString())));
+    }
+
+    @Test
+    void loginReturnsInvalidCredentials() throws Exception {
+        SignUpRequest request = new SignUpRequest("jane@example.com", "S3cure!Pass", "Jane Doe");
+
+        mockMvc.perform(post("/api/v1/auth/signup")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated());
+        LoginRequest loginRequest = new LoginRequest("janet@example.com", "S3cure!Pass");
+
+        mockMvc.perform(post("/api/v1/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(loginRequest)))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code", is("INVALID_CREDENTIALS")))
+                .andExpect(jsonPath("$.message", is("Invalid Credentials.")));
+
+        loginRequest = new LoginRequest("jane@example.com", "S3cure");
+        mockMvc.perform(post("/api/v1/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(loginRequest)))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code", is("INVALID_CREDENTIALS")))
+                .andExpect(jsonPath("$.message", is("Invalid Credentials.")));
     }
 
 }

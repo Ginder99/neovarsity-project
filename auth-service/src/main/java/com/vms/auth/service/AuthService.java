@@ -1,6 +1,7 @@
 package com.vms.auth.service;
 
 import com.vms.auth.dto.AuthResponse;
+import com.vms.auth.dto.LoginRequest;
 import com.vms.auth.dto.SignUpRequest;
 import com.vms.auth.dto.UserResponse;
 import com.vms.auth.entity.RefreshToken;
@@ -9,9 +10,9 @@ import com.vms.auth.repository.RefreshTokenRepository;
 import com.vms.auth.repository.UserRepository;
 import com.vms.auth.security.jwt.JwtService;
 import com.vms.auth.service.exceptions.EmailAlreadyInUseException;
+import com.vms.auth.service.exceptions.InvalidCredentialsException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -37,6 +38,19 @@ public class AuthService {
         User user = new User(UUID.randomUUID().toString(), request.email(), request.name(),
             passwordEncoder.encode(request.password()));
         user = userRepository.save(user);
+        return generateTokens(user);
+    }
+
+    public AuthResponse login(LoginRequest request) {
+        User user = userRepository.findByEmail(request.email())
+                .orElseThrow(InvalidCredentialsException::new);
+        if (!passwordEncoder.matches(request.password(), user.getPasswordHash())) {
+            throw new InvalidCredentialsException();
+        }
+        return generateTokens(user);
+    }
+
+    private AuthResponse generateTokens(User user) {
         String refreshToken = generateRefreshToken(user);
         String accessToken = jwtService.generateToken(user);
         return new AuthResponse(toUserResponse(user), accessToken, refreshToken);

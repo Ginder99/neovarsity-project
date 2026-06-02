@@ -1,6 +1,7 @@
 package com.vms.auth.api;
 
 import com.vms.auth.dto.AuthResponse;
+import com.vms.auth.dto.LoginRequest;
 import com.vms.auth.dto.SignUpRequest;
 import com.vms.auth.service.AuthService;
 import org.springframework.http.HttpStatus;
@@ -22,5 +23,10 @@ public class AuthController {
     @PostMapping("/signup")
     public ResponseEntity<AuthResponse> signup(@RequestBody SignUpRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(authService.signUp(request));
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request) {
+        return ResponseEntity.ok(authService.login(request));
     }
 }
