@@ -1,0 +1,24 @@
+spring:
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:file:./test.db
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.H2Dialect
+        use_sql_comments: true
+    hibernate:
+      ddl-auto: create-drop
+  main:
+    allow-bean-definition-overriding: true
+
+server:
+  servlet:
+    context-path: /v1
+
+jwt:
+  secret: test-secret-key-test-secret-key-test-secret-key-test-secret-key
+  expiration: 3600000
+  refresh-expiration: 604800000
