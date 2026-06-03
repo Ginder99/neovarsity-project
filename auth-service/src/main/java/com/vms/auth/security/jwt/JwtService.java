@@ -23,7 +23,7 @@ public class JwtService {
 
     public String generateToken(User user) {
         return Jwts.builder()
-                .setSubject(user.getId())
+                .setSubject(String.valueOf(user.getId()))
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expirationMs))
                 .signWith(signingKey(), SignatureAlgorithm.HS256)
@@ -36,7 +36,8 @@ public class JwtService {
 
     public boolean isTokenValid(String token, User user) {
         final String userId = extractUserId(token);
-        return userId.equals(user.getId()) && !isTokenExpired(token);
+        Long userIdLong = Long.parseLong(userId);
+        return userIdLong.equals(user.getId()) && !isTokenExpired(token);
     }
 
     private boolean isTokenExpired(String token) {

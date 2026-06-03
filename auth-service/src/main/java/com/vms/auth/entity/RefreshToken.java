@@ -1,16 +1,11 @@
 package com.vms.auth.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import org.jspecify.annotations.Nullable;
 
 import java.time.Instant;
 
@@ -21,8 +16,9 @@ import java.time.Instant;
 @Table(name = "refresh_tokens")
 public class RefreshToken {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(length = 36)
-    private String id;
+    private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
@@ -37,11 +33,10 @@ public class RefreshToken {
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
-    public RefreshToken(String id, User user, String tokenHash, Instant expiresAt) {
-        this.id = id;
+    public RefreshToken(User user, @Nullable String encode, Instant instant) {
         this.user = user;
-        this.tokenHash = tokenHash;
-        this.expiresAt = expiresAt;
+        this.tokenHash = encode;
+        this.expiresAt = instant;
     }
 
     @PrePersist

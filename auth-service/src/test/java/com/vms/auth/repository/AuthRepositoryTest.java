@@ -27,6 +27,6 @@ class AuthRepositoryTest {
     }
 
     private User buildUser(String email) {
-        return new User(UUID.randomUUID().toString(), email, "Jane Doe", "$2a$10$hash");
+        return new User(email, "Jane Doe", "$2a$10$hash");
     }
 }

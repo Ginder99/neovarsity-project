@@ -6,5 +6,5 @@ import tools.jackson.databind.annotation.JsonNaming;
 import java.time.Instant;
 
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-public record UserResponse(String id, String email, String name, Instant createdAt) {
+public record UserResponse(Long id, String email, String name, Instant createdAt) {
 }

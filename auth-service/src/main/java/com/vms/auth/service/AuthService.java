@@ -35,7 +35,7 @@ public class AuthService {
         if (userRepository.existsByEmail(request.email())) {
             throw new EmailAlreadyInUseException(request.email());
         }
-        User user = new User(UUID.randomUUID().toString(), request.email(), request.name(),
+        User user = new User(request.email(), request.name(),
             passwordEncoder.encode(request.password()));
         user = userRepository.save(user);
         return generateTokens(user);
@@ -59,7 +59,6 @@ public class AuthService {
     private String generateRefreshToken(User user) {
         String refreshToken = UUID.randomUUID().toString();
         RefreshToken token = new RefreshToken(
-            UUID.randomUUID().toString(),
             user,
             passwordEncoder.encode(refreshToken),
             Instant.now().plusSeconds(refreshTokenExpirationSeconds)

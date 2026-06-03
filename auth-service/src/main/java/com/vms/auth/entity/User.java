@@ -3,6 +3,8 @@ package com.vms.auth.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.Nullable;
 
 import java.time.Instant;
 
@@ -12,8 +14,9 @@ import java.time.Instant;
 @Table(name = "users")
 public class User {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(length = 36)
-    private String id;
+    private Long id;
 
     @Column(nullable = false, unique = true)
     private String email;
@@ -30,11 +33,10 @@ public class User {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
-    public User(String id, String email, String name, String passwordHash) {
-        this.id = id;
+    public User(String email, String name, @Nullable String encode) {
         this.email = email;
         this.name = name;
-        this.passwordHash = passwordHash;
+        this.passwordHash = encode;
     }
 
     @PrePersist
