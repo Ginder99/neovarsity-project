@@ -9,6 +9,8 @@ import com.vms.auth.service.exceptions.EmailAlreadyInUseException;
 import com.vms.auth.service.exceptions.InvalidCredentialsException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -41,7 +43,6 @@ class AuthServiceTest {
             "S3cure!Pass",
             "Jane Doe"
         ));
-
         assertThat(response.user().email()).isEqualTo("jane@example.com");
         assertThat(response.accessToken()).isNotBlank();
         assertThat(response.refreshToken()).isNotBlank();
@@ -55,7 +56,6 @@ class AuthServiceTest {
                 "S3cure!Pass",
                 "Jane Doe"
         ));
-
         assertThrows(EmailAlreadyInUseException.class, () -> authService.signUp(new SignUpRequest(
                 "jane@example.com",
                 "S3cure!Pass",
@@ -70,7 +70,6 @@ class AuthServiceTest {
                 "S3cure!Pass",
                 "Jane Doe"
         ));
-
         AuthResponse response = authService.login(new LoginRequest(
                 "jane@example.com",
                 "S3cure!Pass"));
@@ -80,7 +79,6 @@ class AuthServiceTest {
         assertThat(userRepository.findByEmail("jane@example.com")).isPresent();
     }
 
-
     @Test
     void loginFailed() {
         authService.signUp(new SignUpRequest(
@@ -88,11 +86,9 @@ class AuthServiceTest {
                 "S3cure!Pass",
                 "Jane Doe"
         ));
-
         assertThrows(InvalidCredentialsException.class, () -> authService.login(new LoginRequest(
                 "janine@example.com",
                 "S3cure!Pass")));
-
         assertThrows(InvalidCredentialsException.class, () -> authService.login(new LoginRequest(
                 "jane@example.com",
                 "Pass")));
