@@ -1,19 +1,18 @@
 package com.vms.auth.service;
 
-import com.vms.auth.dto.AuthResponse;
-import com.vms.auth.dto.LoginRequest;
-import com.vms.auth.dto.SignUpRequest;
+import com.vms.auth.dto.*;
 import com.vms.auth.repository.RefreshTokenRepository;
 import com.vms.auth.repository.UserRepository;
 import com.vms.auth.service.exceptions.EmailAlreadyInUseException;
 import com.vms.auth.service.exceptions.InvalidCredentialsException;
+import com.vms.auth.service.exceptions.InvalidRefreshTokenException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+
+import java.time.Instant;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -94,4 +93,41 @@ class AuthServiceTest {
                 "Pass")));
     }
 
+    @Test
+    void refreshSuccess() {
+        AuthResponse authResponse = authService.signUp(new SignUpRequest(
+                "jane@example.com",
+                "S3cure!Pass",
+                "Jane Doe"
+        ));
+        AccessTokenResponse response = authService.refresh(new RefreshRequest(authResponse.refreshToken()));
+        assertThat(response.accessToken()).isNotBlank();
+    }
+
+    @Test
+    void refreshFailedTokenNotFound() {
+        AuthResponse authResponse = authService.signUp(new SignUpRequest(
+                "jane@example.com",
+                "S3cure!Pass",
+                "Jane Doe"
+        ));
+        refreshTokenRepository.findByUserId(authResponse.user().id()).ifPresent(refreshTokenRepository::delete);
+        assertThrows(InvalidRefreshTokenException.class, () -> authService.refresh(new RefreshRequest(
+                authResponse.refreshToken())));
+    }
+
+    @Test
+    void refreshFailedTokenExpired() {
+        AuthResponse authResponse = authService.signUp(new SignUpRequest(
+                "jane@example.com",
+                "S3cure!Pass",
+                "Jane Doe"
+        ));
+        refreshTokenRepository.findByUserId(authResponse.user().id()).ifPresent(refreshToken -> {
+            refreshToken.setExpiresAt(Instant.now().minusSeconds(3600));
+            refreshTokenRepository.save(refreshToken);
+        });
+        assertThrows(InvalidRefreshTokenException.class, () -> authService.refresh(new RefreshRequest(
+                authResponse.refreshToken())));
+    }
 }

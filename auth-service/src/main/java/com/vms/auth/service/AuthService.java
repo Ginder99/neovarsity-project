@@ -1,9 +1,6 @@
 package com.vms.auth.service;
 
-import com.vms.auth.dto.AuthResponse;
-import com.vms.auth.dto.LoginRequest;
-import com.vms.auth.dto.SignUpRequest;
-import com.vms.auth.dto.UserResponse;
+import com.vms.auth.dto.*;
 import com.vms.auth.entity.RefreshToken;
 import com.vms.auth.entity.User;
 import com.vms.auth.repository.RefreshTokenRepository;
@@ -11,12 +8,17 @@ import com.vms.auth.repository.UserRepository;
 import com.vms.auth.security.jwt.JwtService;
 import com.vms.auth.service.exceptions.EmailAlreadyInUseException;
 import com.vms.auth.service.exceptions.InvalidCredentialsException;
+import com.vms.auth.service.exceptions.InvalidRefreshTokenException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
+import java.util.HexFormat;
 import java.util.UUID;
 
 @Service
@@ -47,7 +49,21 @@ public class AuthService {
         if (!passwordEncoder.matches(request.password(), user.getPasswordHash())) {
             throw new InvalidCredentialsException();
         }
+        refreshTokenRepository.findByUserId(user.getId()).ifPresent(refreshTokenRepository::delete);
         return generateTokens(user);
+    }
+
+    public AccessTokenResponse refresh(RefreshRequest request) {
+        String tokenHash = generateSHA256Hash(request.refreshToken());
+        RefreshToken refreshToken = refreshTokenRepository.findByTokenHash(tokenHash)
+                .orElseThrow(InvalidRefreshTokenException::new);
+        if (refreshToken.getExpiresAt().isBefore(Instant.now())) {
+            refreshTokenRepository.delete(refreshToken);
+            throw new InvalidRefreshTokenException();
+        }
+        User user = refreshToken.getUser();
+        String accessToken = jwtService.generateToken(user);
+        return new AccessTokenResponse(accessToken);
     }
 
     private AuthResponse generateTokens(User user) {
@@ -58,20 +74,31 @@ public class AuthService {
 
     private String generateRefreshToken(User user) {
         String refreshToken = UUID.randomUUID().toString();
+        String hashedToken;
+        hashedToken = generateSHA256Hash(refreshToken);
         RefreshToken token = new RefreshToken(
-            user,
-            passwordEncoder.encode(refreshToken),
-            Instant.now().plusSeconds(refreshTokenExpirationSeconds)
+                user, hashedToken,
+                Instant.now().plusSeconds(refreshTokenExpirationSeconds)
         );
         refreshTokenRepository.save(token);
         return refreshToken;
+    }
+
+    private String generateSHA256Hash(String rawString) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] encodedHash = digest.digest(rawString.getBytes(StandardCharsets.UTF_8));
+            return HexFormat.of().formatHex(encodedHash);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("SHA-256 algorithm not found", e);
+        }
     }
 
     private UserResponse toUserResponse(User user) {
         return new UserResponse(user.getId(), user.getEmail(), user.getName(), user.getCreatedAt());
     }
 
-    public User findUserById(String userId) {
+    public User findUserById(Long userId) {
         return userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found: " + userId));
     }
 }

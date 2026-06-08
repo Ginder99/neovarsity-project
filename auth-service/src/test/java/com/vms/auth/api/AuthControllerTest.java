@@ -1,6 +1,7 @@
 package com.vms.auth.api;
 
 import com.vms.auth.dto.LoginRequest;
+import com.vms.auth.dto.RefreshRequest;
 import com.vms.auth.dto.SignUpRequest;
 import com.vms.auth.repository.RefreshTokenRepository;
 import com.vms.auth.repository.UserRepository;
@@ -15,6 +16,7 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 import tools.jackson.databind.ObjectMapper;
 
 import static org.hamcrest.Matchers.*;
@@ -47,9 +49,9 @@ class AuthControllerTest {
         userRepository.deleteAll();
     }
 
-    private void signUpSuccess() throws Exception {
+    private ResultActions signUpSuccess() throws Exception {
         SignUpRequest request = new SignUpRequest("jane@example.com", "S3cure!Pass", "Jane Doe");
-        mockMvc.perform(post("/api/v1/auth/signup")
+        return mockMvc.perform(post("/api/v1/auth/signup")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated());
@@ -136,4 +138,29 @@ class AuthControllerTest {
                 .andExpect(jsonPath("$.status", is(400)));
     }
 
+    @Test
+    void refreshSuccess() throws Exception {
+        ResultActions resultActions = signUpSuccess();
+        resultActions.andExpect(jsonPath("$.refresh_token", not(emptyString())));
+        String refreshToken = objectMapper.readTree(resultActions.andReturn().getResponse().getContentAsString()).get("refresh_token").asString();
+        mockMvc.perform(post("/api/v1/auth/refresh")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new RefreshRequest(refreshToken))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.access_token", not(emptyString())));
+    }
+
+    @Test
+    void refreshFailed() throws Exception {
+        ResultActions resultActions = signUpSuccess();
+        resultActions.andExpect(jsonPath("$.refresh_token", not(emptyString())));
+        String refreshToken = objectMapper.readTree(resultActions.andReturn().getResponse().getContentAsString()).get("refresh_token").asString();
+        mockMvc.perform(post("/api/v1/auth/refresh")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new RefreshRequest(refreshToken + "invalid"))))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code", is("INVALID_REFRESH_TOKEN")))
+                .andExpect(jsonPath("$.message", is("Invalid refresh token.")))
+                .andExpect(jsonPath("$.status", is(401)));
+    }
 }

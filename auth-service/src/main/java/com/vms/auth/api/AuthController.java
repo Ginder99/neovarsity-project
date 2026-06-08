@@ -1,8 +1,6 @@
 package com.vms.auth.api;
 
-import com.vms.auth.dto.AuthResponse;
-import com.vms.auth.dto.LoginRequest;
-import com.vms.auth.dto.SignUpRequest;
+import com.vms.auth.dto.*;
 import com.vms.auth.service.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -29,5 +27,10 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
         return ResponseEntity.ok(authService.login(request));
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<AccessTokenResponse> refresh(@Valid @RequestBody RefreshRequest request) {
+        return ResponseEntity.ok(authService.refresh(request));
     }
 }
