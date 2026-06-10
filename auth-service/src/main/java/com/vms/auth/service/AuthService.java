@@ -10,6 +10,7 @@ import com.vms.auth.service.exceptions.EmailAlreadyInUseException;
 import com.vms.auth.service.exceptions.InvalidCredentialsException;
 import com.vms.auth.service.exceptions.InvalidRefreshTokenException;
 import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -38,7 +39,7 @@ public class AuthService {
             throw new EmailAlreadyInUseException(request.email());
         }
         User user = new User(request.email(), request.name(),
-            passwordEncoder.encode(request.password()));
+            passwordEncoder.encode(request.password()), false);
         user = userRepository.save(user);
         return generateTokens(user);
     }
@@ -100,5 +101,12 @@ public class AuthService {
 
     public User findUserById(Long userId) {
         return userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found: " + userId));
+    }
+
+    public AuthResponse createGuestSession() {
+        String rawToken = UUID.randomUUID().toString();
+        User user = new User("guest_" + rawToken + "@example.com", "Guest User", passwordEncoder.encode(rawToken), true);
+        user = userRepository.save(user);
+        return generateTokens(user);
     }
 }

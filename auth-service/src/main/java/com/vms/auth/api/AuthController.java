@@ -1,14 +1,13 @@
 package com.vms.auth.api;
 
 import com.vms.auth.dto.*;
+import com.vms.auth.entity.User;
 import com.vms.auth.service.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -32,5 +31,10 @@ public class AuthController {
     @PostMapping("/refresh")
     public ResponseEntity<AccessTokenResponse> refresh(@Valid @RequestBody RefreshRequest request) {
         return ResponseEntity.ok(authService.refresh(request));
+    }
+
+    @PostMapping("/guest")
+    public ResponseEntity<AuthResponse> createGuestSession() {
+        return ResponseEntity.status(HttpStatus.CREATED).body(authService.createGuestSession());
     }
 }

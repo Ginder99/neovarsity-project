@@ -27,16 +27,20 @@ public class User {
     @Column(name = "password_hash", nullable = false)
     private String passwordHash;
 
+    @Column(name = "is_guest", nullable = false)
+    private Boolean isGuest;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
-    public User(String email, String name, @Nullable String encode) {
+    public User(String email, String name, @Nullable String encode, boolean isGuest) {
         this.email = email;
         this.name = name;
         this.passwordHash = encode;
+        this.isGuest = isGuest;
     }
 
     @PrePersist

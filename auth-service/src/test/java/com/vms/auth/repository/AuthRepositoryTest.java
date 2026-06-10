@@ -7,8 +7,6 @@ import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.util.UUID;
-
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @DataJpaTest
@@ -19,14 +17,14 @@ class AuthRepositoryTest {
 
     @Test
     void enforcesUniqueEmail() {
-        userRepository.saveAndFlush(buildUser("jane@example.com"));
+        userRepository.saveAndFlush(buildUser());
 
-        User duplicate = buildUser("jane@example.com");
+        User duplicate = buildUser();
         assertThatThrownBy(() -> userRepository.saveAndFlush(duplicate))
             .isInstanceOf(DataIntegrityViolationException.class);
     }
 
-    private User buildUser(String email) {
-        return new User(email, "Jane Doe", "$2a$10$hash");
+    private User buildUser() {
+        return new User("jane@example.com", "Jane Doe", "$2a$10$hash", false);
     }
 }
