@@ -37,4 +37,9 @@ public class AuthController {
     public ResponseEntity<AuthResponse> createGuestSession() {
         return ResponseEntity.status(HttpStatus.CREATED).body(authService.createGuestSession());
     }
+
+    @GetMapping("/test-token")
+    public ResponseEntity<String> testTokenValidity(@AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(user.getName());
+    }
 }

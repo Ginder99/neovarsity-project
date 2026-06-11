@@ -20,6 +20,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import tools.jackson.databind.ObjectMapper;
 
 import static org.hamcrest.Matchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -162,5 +163,32 @@ class AuthControllerTest {
                 .andExpect(jsonPath("$.code", is("INVALID_REFRESH_TOKEN")))
                 .andExpect(jsonPath("$.message", is("Invalid refresh token.")))
                 .andExpect(jsonPath("$.status", is(401)));
+    }
+
+
+    @Test
+    void createGuestSession() throws Exception {
+        mockMvc.perform(post("/api/v1/auth/guest")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(""))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.user.id", not(emptyString())))
+                .andExpect(jsonPath("$.user.name", is("Guest User")))
+                .andExpect(jsonPath("$.user.email", not(emptyString())))
+                .andExpect(jsonPath("$.user.created_at", notNullValue()))
+                .andExpect(jsonPath("$.access_token", not(emptyString())))
+                .andExpect(jsonPath("$.refresh_token", not(emptyString())));
+    }
+
+
+    @Test
+    void testToken() throws Exception {
+        ResultActions resultActions = signUpSuccess();
+        resultActions.andExpect(jsonPath("$.access_token", not(emptyString())));
+        String token = objectMapper.readTree(resultActions.andReturn().getResponse().getContentAsString()).get("access_token").asString();
+        mockMvc.perform(get("/api/v1/auth/test-token")
+                .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", is("Jane Doe")));
     }
 }
