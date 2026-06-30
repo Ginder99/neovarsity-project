@@ -23,5 +23,5 @@ refresh-token:
 
 logging:
     level:
-        com.vms.auth: INFO
-        org.springframework.web: INFO
+        com.vms.auth: ERROR
+        org.springframework.web: ERROR

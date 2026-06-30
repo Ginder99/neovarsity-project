@@ -2,10 +2,12 @@ package com.vms.auth.service;
 
 import com.vms.auth.dto.*;
 import com.vms.auth.entity.RefreshToken;
+import com.vms.auth.entity.Role;
 import com.vms.auth.entity.User;
 import com.vms.auth.repository.RefreshTokenRepository;
 import com.vms.auth.repository.UserRepository;
 import com.vms.auth.security.jwt.JwtService;
+import com.vms.auth.service.exceptions.AccountInactiveException;
 import com.vms.auth.service.exceptions.EmailAlreadyInUseException;
 import com.vms.auth.service.exceptions.InvalidCredentialsException;
 import com.vms.auth.service.exceptions.InvalidRefreshTokenException;
@@ -37,9 +39,14 @@ public class AuthService {
         if (userRepository.existsByEmail(request.email())) {
             throw new EmailAlreadyInUseException(request.email());
         }
+        boolean isActive = request.role() == Role.CONSUMER || request.role() == Role.GUEST;
         User user = new User(request.email(), request.name(),
-            passwordEncoder.encode(request.password()), false);
+            passwordEncoder.encode(request.password()), false, request.role(), isActive);
         user = userRepository.save(user);
+        
+        if (!isActive) {
+            return new AuthResponse(toUserResponse(user), "Your account is created but inactive. Please call support to activate your account.");
+        }
         return generateTokens(user);
     }
 
@@ -48,6 +55,9 @@ public class AuthService {
                 .orElseThrow(InvalidCredentialsException::new);
         if (!passwordEncoder.matches(request.password(), user.getPasswordHash())) {
             throw new InvalidCredentialsException();
+        }
+        if (!user.getIsActive()) {
+            throw new AccountInactiveException();
         }
         refreshTokenRepository.findByUserId(user.getId()).ifPresent(refreshTokenRepository::delete);
         return generateTokens(user);
@@ -95,7 +105,7 @@ public class AuthService {
     }
 
     private UserResponse toUserResponse(User user) {
-        return new UserResponse(user.getId(), user.getEmail(), user.getName(), user.getCreatedAt());
+        return new UserResponse(user.getId(), user.getEmail(), user.getName(), user.getRole(), user.getIsActive(), user.getCreatedAt());
     }
 
     public User findUserById(Long userId) {
@@ -104,7 +114,7 @@ public class AuthService {
 
     public AuthResponse createGuestSession() {
         String rawToken = UUID.randomUUID().toString();
-        User user = new User("guest_" + rawToken + "@example.com", "Guest User", passwordEncoder.encode(rawToken), true);
+        User user = new User("guest_" + rawToken + "@example.com", "Guest User", passwordEncoder.encode(rawToken), true, Role.GUEST, true);
         user = userRepository.save(user);
         return generateTokens(user);
     }
