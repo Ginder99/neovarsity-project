@@ -11,7 +11,9 @@ import com.vms.auth.service.exceptions.AccountInactiveException;
 import com.vms.auth.service.exceptions.EmailAlreadyInUseException;
 import com.vms.auth.service.exceptions.InvalidCredentialsException;
 import com.vms.auth.service.exceptions.InvalidRefreshTokenException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -25,6 +27,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthService {
 
     @Value("${refresh-token.expiration}")
@@ -35,8 +38,11 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
 
+    @Transactional
     public AuthResponse signUp(SignUpRequest request) {
+        log.info("Attempting to sign up user with email: {}", request.email());
         if (userRepository.existsByEmail(request.email())) {
+            log.warn("Sign up failed: Email already in use: {}", request.email());
             throw new EmailAlreadyInUseException(request.email());
         }
         boolean isActive = request.role() == Role.CONSUMER || request.role() == Role.GUEST;
@@ -45,34 +51,45 @@ public class AuthService {
         user = userRepository.save(user);
         
         if (!isActive) {
+            log.info("User created but inactive: {}", user.getEmail());
             return new AuthResponse(toUserResponse(user), "Your account is created but inactive. Please call support to activate your account.");
         }
+        log.info("User successfully signed up: {}", user.getEmail());
         return generateTokens(user);
     }
 
+    @Transactional
     public AuthResponse login(LoginRequest request) {
+        log.info("Attempting to login user with email: {}", request.email());
         User user = userRepository.findByEmail(request.email())
                 .orElseThrow(InvalidCredentialsException::new);
         if (!passwordEncoder.matches(request.password(), user.getPasswordHash())) {
+            log.warn("Login failed: Invalid credentials for email: {}", request.email());
             throw new InvalidCredentialsException();
         }
         if (!user.getIsActive()) {
+            log.warn("Login failed: Account inactive for email: {}", request.email());
             throw new AccountInactiveException();
         }
         refreshTokenRepository.findByUserId(user.getId()).ifPresent(refreshTokenRepository::delete);
+        log.info("User successfully logged in: {}", user.getEmail());
         return generateTokens(user);
     }
 
+    @Transactional
     public AccessTokenResponse refresh(RefreshRequest request) {
+        log.debug("Attempting to refresh access token");
         String tokenHash = generateSHA256Hash(request.refreshToken());
         RefreshToken refreshToken = refreshTokenRepository.findByTokenHash(tokenHash)
                 .orElseThrow(InvalidRefreshTokenException::new);
         if (refreshToken.getExpiresAt().isBefore(Instant.now())) {
+            log.warn("Refresh failed: Token expired for user: {}", refreshToken.getUser().getEmail());
             refreshTokenRepository.delete(refreshToken);
             throw new InvalidRefreshTokenException();
         }
         User user = refreshToken.getUser();
         String accessToken = jwtService.generateToken(user);
+        log.debug("Access token successfully refreshed for user: {}", user.getEmail());
         return new AccessTokenResponse(accessToken);
     }
 
@@ -100,6 +117,7 @@ public class AuthService {
             byte[] encodedHash = digest.digest(rawString.getBytes(StandardCharsets.UTF_8));
             return HexFormat.of().formatHex(encodedHash);
         } catch (NoSuchAlgorithmException e) {
+            log.error("SHA-256 algorithm not found", e);
             throw new RuntimeException("SHA-256 algorithm not found", e);
         }
     }
@@ -108,14 +126,21 @@ public class AuthService {
         return new UserResponse(user.getId(), user.getEmail(), user.getName(), user.getRole(), user.getIsActive(), user.getCreatedAt());
     }
 
+    @Transactional
     public User findUserById(Long userId) {
-        return userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found: " + userId));
+        return userRepository.findById(userId).orElseThrow(() -> {
+            log.error("User not found: {}", userId);
+            return new RuntimeException("User not found: " + userId);
+        });
     }
 
+    @Transactional
     public AuthResponse createGuestSession() {
+        log.info("Creating guest session");
         String rawToken = UUID.randomUUID().toString();
         User user = new User("guest_" + rawToken + "@example.com", "Guest User", passwordEncoder.encode(rawToken), true, Role.GUEST, true);
         user = userRepository.save(user);
+        log.info("Guest session created for user: {}", user.getEmail());
         return generateTokens(user);
     }
 }
