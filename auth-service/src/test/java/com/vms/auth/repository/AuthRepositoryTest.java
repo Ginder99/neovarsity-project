@@ -1,5 +1,6 @@
 package com.vms.auth.repository;
 
+import com.vms.auth.entity.Role;
 import com.vms.auth.entity.User;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,6 @@ class AuthRepositoryTest {
     }
 
     private User buildUser() {
-        return new User("jane@example.com", "Jane Doe", "$2a$10$hash", false);
+        return new User("jane@example.com", "Jane Doe", "$2a$10$hash", false, Role.CONSUMER, true);
     }
 }
