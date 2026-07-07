@@ -1,3 +1,16 @@
 spring:
   application:
     name: machine-discovery-service
+  datasource:
+    url: jdbc:mysql://localhost:3306/vms_db
+    username: ${DB_USER:application_user}
+    password: ${DB_PASSWORD:App_user_pwd}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+jwt:
+  secret: ${JWT_SECRET:this-is-a-big-secret-key-for-jwt-token-generation}
+  expiration-ms: 3600000
+server:
+  port: 9002
