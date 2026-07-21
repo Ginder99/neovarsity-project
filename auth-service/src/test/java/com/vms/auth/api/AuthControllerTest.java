@@ -3,7 +3,10 @@ package com.vms.auth.api;
 import com.vms.auth.dto.LoginRequest;
 import com.vms.auth.dto.RefreshRequest;
 import com.vms.auth.dto.SignUpRequest;
+import com.vms.auth.dto.CreateUserRequest;
 import com.vms.auth.entity.Role;
+import com.vms.auth.entity.User;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import com.vms.auth.repository.RefreshTokenRepository;
 import com.vms.auth.repository.UserRepository;
 import com.vms.auth.service.AuthService;
@@ -44,6 +47,9 @@ class AuthControllerTest {
 
     @Autowired
     private RefreshTokenRepository refreshTokenRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @BeforeEach
     void setUp() {
@@ -216,5 +222,52 @@ class AuthControllerTest {
                 .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", is("Jane Doe")));
+    }
+
+    @Test
+    void adminCreateUserSuccess() throws Exception {
+        userRepository.save(new User("admin@example.com", "Admin User", passwordEncoder.encode("S3cure!Pass"), Role.ADMIN, true));
+
+        LoginRequest loginReq = new LoginRequest("admin@example.com", "S3cure!Pass");
+        String loginRes = mockMvc.perform(post("/api/v1/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(loginReq)))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        String adminToken = objectMapper.readTree(loginRes).get("access_token").asString();
+
+        CreateUserRequest createReq = new CreateUserRequest("newconsumer@example.com", "New Consumer", Role.CONSUMER);
+        mockMvc.perform(post("/api/v1/auth/admin/users")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(createReq)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.user.email", is("newconsumer@example.com")))
+                .andExpect(jsonPath("$.user.name", is("New Consumer")))
+                .andExpect(jsonPath("$.user.role", is("CONSUMER")))
+                .andExpect(jsonPath("$.user.is_active", is(false)))
+                .andExpect(jsonPath("$.temp_password", startsWith("TEMP_")));
+    }
+
+    @Test
+    void adminCreateUserForbiddenForNonAdmin() throws Exception {
+        ResultActions resultActions = signUpSuccess();
+        String userToken = objectMapper.readTree(resultActions.andReturn().getResponse().getContentAsString()).get("access_token").asString();
+
+        CreateUserRequest createReq = new CreateUserRequest("newconsumer@example.com", "New Consumer", Role.CONSUMER);
+        mockMvc.perform(post("/api/v1/auth/admin/users")
+                        .header("Authorization", "Bearer " + userToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(createReq)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void adminCreateUserUnauthorized() throws Exception {
+        CreateUserRequest createReq = new CreateUserRequest("newconsumer@example.com", "New Consumer", Role.CONSUMER);
+        mockMvc.perform(post("/api/v1/auth/admin/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(createReq)))
+                .andExpect(status().isUnauthorized());
     }
 }

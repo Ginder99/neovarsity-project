@@ -33,6 +33,11 @@ public class AuthController {
         return ResponseEntity.ok(authService.refresh(request));
     }
 
+    @PostMapping("/admin/users")
+    public ResponseEntity<AdminCreateUserResponse> adminCreateUser(@Valid @RequestBody CreateUserRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(authService.adminCreateUser(request));
+    }
+
     @GetMapping("/test-token")
     public ResponseEntity<String> testTokenValidity(@AuthenticationPrincipal User user) {
         return ResponseEntity.ok(user.getName());

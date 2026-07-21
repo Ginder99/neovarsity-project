@@ -133,4 +133,28 @@ public class AuthService {
             return new RuntimeException("User not found: " + userId);
         });
     }
+
+    @Transactional
+    public AdminCreateUserResponse adminCreateUser(CreateUserRequest request) {
+        log.info("Admin attempting to create user with email: {}", request.email());
+        if (userRepository.existsByEmail(request.email())) {
+            log.warn("User creation failed: Email already in use: {}", request.email());
+            throw new EmailAlreadyInUseException(request.email());
+        }
+
+        String tempPassword = "TEMP_" + UUID.randomUUID().toString().substring(0, 8);
+        String encodedPassword = passwordEncoder.encode(tempPassword);
+
+        User user = new User(
+                request.email(),
+                request.name(),
+                encodedPassword,
+                request.role(),
+                false
+        );
+        user = userRepository.save(user);
+
+        log.info("User successfully created by Admin: {}", user.getEmail());
+        return new AdminCreateUserResponse(toUserResponse(user), tempPassword);
+    }
 }
