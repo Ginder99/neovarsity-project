@@ -45,15 +45,10 @@ public class AuthService {
             log.warn("Sign up failed: Email already in use: {}", request.email());
             throw new EmailAlreadyInUseException(request.email());
         }
-        boolean isActive = request.role() == Role.CONSUMER;
         User user = new User(request.email(), request.name(),
-            passwordEncoder.encode(request.password()), request.role(), isActive);
+            passwordEncoder.encode(request.password()), Role.CONSUMER, true);
         user = userRepository.save(user);
-        
-        if (!isActive) {
-            log.info("User created but inactive: {}", user.getEmail());
-            return new AuthResponse(toUserResponse(user), "Your account is created but inactive. Please call support to activate your account.");
-        }
+
         log.info("User successfully signed up: {}", user.getEmail());
         return generateTokens(user);
     }
