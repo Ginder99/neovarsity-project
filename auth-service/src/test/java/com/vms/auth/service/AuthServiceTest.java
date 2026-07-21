@@ -168,8 +168,7 @@ class AuthServiceTest {
         authService.signUp(new SignUpRequest(
                 "newuser@example.com",
                 "S3cure!Pass",
-                "Existing User",
-                Role.CONSUMER
+                "Existing User"
         ));
         assertThrows(EmailAlreadyInUseException.class, () -> authService.adminCreateUser(new CreateUserRequest(
                 "newuser@example.com",
