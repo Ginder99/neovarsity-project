@@ -45,9 +45,9 @@ public class AuthService {
             log.warn("Sign up failed: Email already in use: {}", request.email());
             throw new EmailAlreadyInUseException(request.email());
         }
-        boolean isActive = request.role() == Role.CONSUMER || request.role() == Role.GUEST;
+        boolean isActive = request.role() == Role.CONSUMER;
         User user = new User(request.email(), request.name(),
-            passwordEncoder.encode(request.password()), false, request.role(), isActive);
+            passwordEncoder.encode(request.password()), request.role(), isActive);
         user = userRepository.save(user);
         
         if (!isActive) {
@@ -132,15 +132,5 @@ public class AuthService {
             log.error("User not found: {}", userId);
             return new RuntimeException("User not found: " + userId);
         });
-    }
-
-    @Transactional
-    public AuthResponse createGuestSession() {
-        log.info("Creating guest session");
-        String rawToken = UUID.randomUUID().toString();
-        User user = new User("guest_" + rawToken + "@example.com", "Guest User", passwordEncoder.encode(rawToken), true, Role.GUEST, true);
-        user = userRepository.save(user);
-        log.info("Guest session created for user: {}", user.getEmail());
-        return generateTokens(user);
     }
 }

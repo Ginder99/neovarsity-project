@@ -208,23 +208,6 @@ class AuthControllerTest {
 
 
     @Test
-    void createGuestSession() throws Exception {
-        mockMvc.perform(post("/api/v1/auth/guest")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(""))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.user.id", not(emptyString())))
-                .andExpect(jsonPath("$.user.name", is("Guest User")))
-                .andExpect(jsonPath("$.user.email", not(emptyString())))
-                .andExpect(jsonPath("$.user.role", is("GUEST")))
-                .andExpect(jsonPath("$.user.is_active", is(true)))
-                .andExpect(jsonPath("$.user.created_at", notNullValue()))
-                .andExpect(jsonPath("$.access_token", not(emptyString())))
-                .andExpect(jsonPath("$.refresh_token", not(emptyString())));
-    }
-
-
-    @Test
     void testToken() throws Exception {
         ResultActions resultActions = signUpSuccess();
         resultActions.andExpect(jsonPath("$.access_token", not(emptyString())));

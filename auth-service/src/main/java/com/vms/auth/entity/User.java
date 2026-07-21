@@ -27,9 +27,6 @@ public class User {
     @Column(name = "password_hash", nullable = false)
     private String passwordHash;
 
-    @Column(name = "is_guest", nullable = false)
-    private Boolean isGuest;
-
     @Column(name = "is_active", nullable = false)
     private Boolean isActive;
 
@@ -43,11 +40,10 @@ public class User {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
-    public User(String email, String name, @Nullable String encode, boolean isGuest, Role role, boolean isActive) {
+    public User(String email, String name, @Nullable String encode, Role role, boolean isActive) {
         this.email = email;
         this.name = name;
         this.passwordHash = encode;
-        this.isGuest = isGuest;
         this.role = role;
         this.isActive = isActive;
     }

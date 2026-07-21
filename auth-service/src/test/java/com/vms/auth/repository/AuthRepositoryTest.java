@@ -26,6 +26,6 @@ class AuthRepositoryTest {
     }
 
     private User buildUser() {
-        return new User("jane@example.com", "Jane Doe", "$2a$10$hash", false, Role.CONSUMER, true);
+        return new User("jane@example.com", "Jane Doe", "$2a$10$hash", Role.CONSUMER, true);
     }
 }
