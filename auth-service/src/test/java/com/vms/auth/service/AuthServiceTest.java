@@ -147,4 +147,33 @@ class AuthServiceTest {
         assertThrows(InvalidRefreshTokenException.class, () -> authService.refresh(new RefreshRequest(
                 authResponse.refreshToken())));
     }
+
+    @Test
+    void adminCreateUserSuccess() {
+        AdminCreateUserResponse response = authService.adminCreateUser(new CreateUserRequest(
+                "newuser@example.com",
+                "New User",
+                Role.CONSUMER
+        ));
+        assertThat(response.user().email()).isEqualTo("newuser@example.com");
+        assertThat(response.user().name()).isEqualTo("New User");
+        assertThat(response.user().role()).isEqualTo(Role.CONSUMER);
+        assertThat(response.user().isActive()).isFalse();
+        assertThat(response.tempPassword()).startsWith("TEMP_");
+        assertThat(userRepository.findByEmail("newuser@example.com")).isPresent();
+    }
+
+    @Test
+    void adminCreateUserThrowsEmailExistsError() {
+        authService.signUp(new SignUpRequest(
+                "newuser@example.com",
+                "S3cure!Pass",
+                "Existing User"
+        ));
+        assertThrows(EmailAlreadyInUseException.class, () -> authService.adminCreateUser(new CreateUserRequest(
+                "newuser@example.com",
+                "Another Name",
+                Role.MACHINE_HANDLER
+        )));
+    }
 }
