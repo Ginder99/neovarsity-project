@@ -21,6 +21,9 @@ jwt:
 refresh-token:
   expiration: 604800000
 
+password-reset-token:
+  expiration: 3600
+
 logging:
     level:
         com.vms.auth: ERROR

@@ -1,21 +1,25 @@
 package com.vms.auth.service;
 
 import com.vms.auth.dto.*;
+import com.vms.auth.entity.PasswordResetToken;
 import com.vms.auth.entity.Role;
+import com.vms.auth.entity.User;
+import com.vms.auth.repository.PasswordResetTokenRepository;
 import com.vms.auth.repository.RefreshTokenRepository;
 import com.vms.auth.repository.UserRepository;
-import com.vms.auth.service.exceptions.EmailAlreadyInUseException;
-import com.vms.auth.service.exceptions.InvalidCredentialsException;
-import com.vms.auth.service.exceptions.InvalidRefreshTokenException;
+import com.vms.auth.service.exceptions.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.time.Instant;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
@@ -30,8 +34,15 @@ class AuthServiceTest {
     @Autowired
     private RefreshTokenRepository refreshTokenRepository;
 
+    @Autowired
+    private PasswordResetTokenRepository passwordResetTokenRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @BeforeEach
     void setUp() {
+        passwordResetTokenRepository.deleteAll();
         refreshTokenRepository.deleteAll();
         userRepository.deleteAll();
     }
@@ -175,5 +186,59 @@ class AuthServiceTest {
                 "Another Name",
                 Role.MACHINE_HANDLER
         )));
+    }
+
+    @Test
+    void forgotPasswordSuccess() {
+        authService.signUp(new SignUpRequest("jane@example.com", "S3cure!Pass", "Jane Doe"));
+        authService.forgotPassword(new ForgotPasswordRequest("jane@example.com"));
+        assertThat(passwordResetTokenRepository.count()).isEqualTo(1);
+    }
+
+    @Test
+    void forgotPasswordFailedEmailNotFound() {
+        authService.signUp(new SignUpRequest("jane@example.com", "S3cure!Pass", "Jane Doe"));
+        RecordNotFoundException exception = assertThrows(RecordNotFoundException.class, () -> authService.forgotPassword(new ForgotPasswordRequest("jane@examples.com")));
+        assertEquals("Couldn't find this Email", exception.getMessage());
+    }
+
+    @Test
+    void resetPasswordSuccess() {
+        authService.signUp(new SignUpRequest("jane@example.com", "S3cure!Pass", "Jane Doe"));
+        User user = userRepository.findByEmail("jane@example.com").get();
+
+        String rawToken = UUID.randomUUID().toString();
+        String hashedToken = authService.generateSHA256Hash(rawToken);
+        passwordResetTokenRepository.save(new PasswordResetToken(user, hashedToken, Instant.now().plusSeconds(3600)));
+
+        authService.resetPassword(new ResetPasswordRequest(rawToken, "NewS3cure!Pass"));
+        
+        assertThat(passwordEncoder.matches("NewS3cure!Pass", userRepository.findByEmail("jane@example.com").get().getPasswordHash())).isTrue();
+        assertThat(passwordResetTokenRepository.count()).isEqualTo(0);
+    }
+
+    @Test
+    void resetPasswordFailedInvalidToken() {
+        authService.signUp(new SignUpRequest("jane@example.com", "S3cure!Pass", "Jane Doe"));
+        User user = userRepository.findByEmail("jane@example.com").get();
+
+        String rawToken = UUID.randomUUID().toString();
+        String hashedToken = authService.generateSHA256Hash(rawToken);
+        passwordResetTokenRepository.save(new PasswordResetToken(user, hashedToken, Instant.now().plusSeconds(3600)));
+
+        assertThrows(InvalidResetTokenException.class, () -> authService.resetPassword(new ResetPasswordRequest("rawToken", "NewS3cure!Pass")));
+    }
+
+    @Test
+    void resetPasswordFailedExpiredToken() throws Exception {
+        authService.signUp(new SignUpRequest("jane@example.com", "S3cure!Pass", "Jane Doe"));
+        User user = userRepository.findByEmail("jane@example.com").get();
+
+        String rawToken = UUID.randomUUID().toString();
+        String hashedToken = authService.generateSHA256Hash(rawToken);
+        passwordResetTokenRepository.save(new PasswordResetToken(user, hashedToken, Instant.now().plusSeconds(1)));
+
+        Thread.sleep(2000);
+        assertThrows(InvalidResetTokenException.class, () -> authService.resetPassword(new ResetPasswordRequest(rawToken, "NewS3cure!Pass")));
     }
 }

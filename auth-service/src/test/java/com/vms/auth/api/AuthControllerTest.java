@@ -1,15 +1,14 @@
 package com.vms.auth.api;
 
-import com.vms.auth.dto.LoginRequest;
-import com.vms.auth.dto.RefreshRequest;
-import com.vms.auth.dto.SignUpRequest;
-import com.vms.auth.dto.CreateUserRequest;
+import com.vms.auth.dto.*;
+import com.vms.auth.entity.PasswordResetToken;
 import com.vms.auth.entity.Role;
 import com.vms.auth.entity.User;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import com.vms.auth.repository.PasswordResetTokenRepository;
 import com.vms.auth.repository.RefreshTokenRepository;
 import com.vms.auth.repository.UserRepository;
 import com.vms.auth.service.AuthService;
+import tools.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -18,12 +17,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import tools.jackson.databind.ObjectMapper;
 
+import java.time.Instant;
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -49,10 +53,14 @@ class AuthControllerTest {
     private RefreshTokenRepository refreshTokenRepository;
 
     @Autowired
+    private PasswordResetTokenRepository passwordResetTokenRepository;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     @BeforeEach
     void setUp() {
+        passwordResetTokenRepository.deleteAll();
         refreshTokenRepository.deleteAll();
         userRepository.deleteAll();
     }
@@ -250,5 +258,62 @@ class AuthControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(createReq)))
                 .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void forgotPasswordReturnsNoContent() throws Exception {
+        ResultActions resultActions = signUpSuccess();
+        AuthResponse response = objectMapper.readValue(resultActions.andReturn().getResponse().getContentAsString(), AuthResponse.class);
+        assertNotNull(response);
+        assertNotNull(response.user());
+        ForgotPasswordRequest request = new ForgotPasswordRequest("jane@example.com");
+
+        mockMvc.perform(post("/api/v1/auth/forgot-password")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isNoContent());
+        assertThat(passwordResetTokenRepository.count()).isEqualTo(1);
+    }
+
+    @Test
+    void forgotPasswordReturnsNotFound() throws Exception {
+        signUpSuccess();
+        ForgotPasswordRequest request = new ForgotPasswordRequest("jane@examples.com");
+
+        mockMvc.perform(post("/api/v1/auth/forgot-password")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code", is("RECORD_NOT_FOUND")))
+                .andExpect(jsonPath("$.message", is("Couldn't find this Email")));
+    }
+
+    @Test
+    void resetPasswordReturnsNoContent() throws Exception {
+        signUpSuccess();
+        User user = userRepository.findByEmail("jane@example.com").get();
+
+        String rawToken = UUID.randomUUID().toString();
+        String hashedToken = authService.generateSHA256Hash(rawToken);
+        passwordResetTokenRepository.save(new PasswordResetToken(user, hashedToken, Instant.now().plusSeconds(3600)));
+
+        ResetPasswordRequest request = new ResetPasswordRequest(rawToken, "NewS3cure!Pass");
+
+        mockMvc.perform(post("/api/v1/auth/reset-password")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void resetPasswordReturnsBadRequestForInvalidToken() throws Exception {
+        ResetPasswordRequest request = new ResetPasswordRequest("invalid-token", "NewS3cure!Pass");
+
+        mockMvc.perform(post("/api/v1/auth/reset-password")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code", is("INVALID_RESET_TOKEN")))
+                .andExpect(jsonPath("$.message", is("Invalid or expired reset token")));
     }
 }

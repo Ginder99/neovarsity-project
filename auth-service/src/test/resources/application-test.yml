@@ -22,3 +22,6 @@ jwt:
   secret: test-secret-key-test-secret-key-test-secret-key-test-secret-key
   expiration-ms: 3000
   refresh-expiration: 604800000
+
+password-reset-token:
+  expiration: 1

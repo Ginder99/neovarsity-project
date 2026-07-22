@@ -2,15 +2,19 @@ package com.vms.auth.service;
 
 import com.vms.auth.dto.*;
 import com.vms.auth.entity.RefreshToken;
+import com.vms.auth.entity.PasswordResetToken;
 import com.vms.auth.entity.Role;
 import com.vms.auth.entity.User;
 import com.vms.auth.repository.RefreshTokenRepository;
+import com.vms.auth.repository.PasswordResetTokenRepository;
 import com.vms.auth.repository.UserRepository;
 import com.vms.auth.security.jwt.JwtService;
 import com.vms.auth.service.exceptions.AccountInactiveException;
 import com.vms.auth.service.exceptions.EmailAlreadyInUseException;
 import com.vms.auth.service.exceptions.InvalidCredentialsException;
 import com.vms.auth.service.exceptions.InvalidRefreshTokenException;
+import com.vms.auth.service.exceptions.InvalidResetTokenException;
+import com.vms.auth.service.exceptions.RecordNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,8 +39,53 @@ public class AuthService {
 
     private final UserRepository userRepository;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final PasswordResetTokenRepository passwordResetTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+
+    @Value("${password-reset-token.expiration}")
+    private long passwordResetTokenExpirationSeconds;
+
+    @Transactional
+    public void forgotPassword(ForgotPasswordRequest request) {
+        log.info("Attempting to initiate password reset for email: {}", request.email());
+        User user = userRepository.findByEmail(request.email())
+                .orElseThrow(() -> new RecordNotFoundException("Email"));
+
+        passwordResetTokenRepository.deleteByUserId(user.getId());
+
+        String token = UUID.randomUUID().toString();
+        String hashedToken = generateSHA256Hash(token);
+        PasswordResetToken resetToken = new PasswordResetToken(
+                user, hashedToken,
+                Instant.now().plusSeconds(passwordResetTokenExpirationSeconds)
+        );
+        passwordResetTokenRepository.save(resetToken);
+
+        log.info("Password reset token generated for email: {}. Token: {}", request.email(), token);
+        // TODO: Trigger email notification
+    }
+
+    @Transactional
+    public void resetPassword(ResetPasswordRequest request) {
+        log.info("Attempting to reset password with token");
+        String tokenHash = generateSHA256Hash(request.token());
+        PasswordResetToken resetToken = passwordResetTokenRepository.findByTokenHash(tokenHash)
+                .orElseThrow(InvalidResetTokenException::new);
+
+        if (resetToken.getExpiresAt().isBefore(Instant.now())) {
+            log.warn("Reset failed: Token expired for user: {}", resetToken.getUser().getEmail());
+            passwordResetTokenRepository.delete(resetToken);
+            throw new InvalidResetTokenException();
+        }
+
+        User user = resetToken.getUser();
+        user.setPasswordHash(passwordEncoder.encode(request.newPassword())); // This needs a setter in User entity if it doesn't exist
+        userRepository.save(user);
+
+        passwordResetTokenRepository.delete(resetToken);
+        log.info("Password successfully reset for user: {}", user.getEmail());
+    }
 
     @Transactional
     public AuthResponse signUp(SignUpRequest request) {
@@ -106,7 +155,7 @@ public class AuthService {
         return refreshToken;
     }
 
-    private String generateSHA256Hash(String rawString) {
+    public String generateSHA256Hash(String rawString) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             byte[] encodedHash = digest.digest(rawString.getBytes(StandardCharsets.UTF_8));
@@ -150,6 +199,7 @@ public class AuthService {
         user = userRepository.save(user);
 
         log.info("User successfully created by Admin: {}", user.getEmail());
+        // TODO: Trigger email notification
         return new AdminCreateUserResponse(toUserResponse(user), tempPassword);
     }
 }
