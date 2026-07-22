@@ -34,8 +34,9 @@ public class AuthController {
     }
 
     @PostMapping("/admin/users")
-    public ResponseEntity<AdminCreateUserResponse> adminCreateUser(@Valid @RequestBody CreateUserRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(authService.adminCreateUser(request));
+    public ResponseEntity<Void> adminCreateUser(@Valid @RequestBody CreateUserRequest request) {
+        authService.adminCreateUser(request);
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/forgot-password")

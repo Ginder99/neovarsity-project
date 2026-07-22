@@ -24,4 +24,7 @@ jwt:
   refresh-expiration: 604800000
 
 password-reset-token:
-  expiration: 1
+  expiration:
+    forgot: 1
+    new-user: 1
+

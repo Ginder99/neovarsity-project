@@ -16,10 +16,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.time.Instant;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
@@ -161,17 +163,16 @@ class AuthServiceTest {
 
     @Test
     void adminCreateUserSuccess() {
-        AdminCreateUserResponse response = authService.adminCreateUser(new CreateUserRequest(
+        authService.adminCreateUser(new CreateUserRequest(
                 "newuser@example.com",
                 "New User",
                 Role.CONSUMER
         ));
-        assertThat(response.user().email()).isEqualTo("newuser@example.com");
-        assertThat(response.user().name()).isEqualTo("New User");
-        assertThat(response.user().role()).isEqualTo(Role.CONSUMER);
-        assertThat(response.user().isActive()).isFalse();
-        assertThat(response.tempPassword()).startsWith("TEMP_");
-        assertThat(userRepository.findByEmail("newuser@example.com")).isPresent();
+        Optional<User> userOpt = userRepository.findByEmail("newuser@example.com");
+        assertThat(userOpt).isPresent();
+        PasswordResetToken resetToken = passwordResetTokenRepository.findByUser(userOpt.get());
+        assertNotNull(resetToken);
+        assertEquals("NEW_ACCOUNT_ACTIVATION", resetToken.getPurpose());
     }
 
     @Test
@@ -209,7 +210,7 @@ class AuthServiceTest {
 
         String rawToken = UUID.randomUUID().toString();
         String hashedToken = authService.generateSHA256Hash(rawToken);
-        passwordResetTokenRepository.save(new PasswordResetToken(user, hashedToken, Instant.now().plusSeconds(3600)));
+        passwordResetTokenRepository.save(new PasswordResetToken(user, hashedToken, Instant.now().plusSeconds(3600), "FORGOT_PASSWORD"));
 
         authService.resetPassword(new ResetPasswordRequest(rawToken, "NewS3cure!Pass"));
         
@@ -224,7 +225,7 @@ class AuthServiceTest {
 
         String rawToken = UUID.randomUUID().toString();
         String hashedToken = authService.generateSHA256Hash(rawToken);
-        passwordResetTokenRepository.save(new PasswordResetToken(user, hashedToken, Instant.now().plusSeconds(3600)));
+        passwordResetTokenRepository.save(new PasswordResetToken(user, hashedToken, Instant.now().plusSeconds(3600), "FORGOT_PASSWORD"));
 
         assertThrows(InvalidResetTokenException.class, () -> authService.resetPassword(new ResetPasswordRequest("rawToken", "NewS3cure!Pass")));
     }
@@ -236,7 +237,7 @@ class AuthServiceTest {
 
         String rawToken = UUID.randomUUID().toString();
         String hashedToken = authService.generateSHA256Hash(rawToken);
-        passwordResetTokenRepository.save(new PasswordResetToken(user, hashedToken, Instant.now().plusSeconds(1)));
+        passwordResetTokenRepository.save(new PasswordResetToken(user, hashedToken, Instant.now().plusSeconds(1), "FORGOT_PASSWORD"));
 
         Thread.sleep(2000);
         assertThrows(InvalidResetTokenException.class, () -> authService.resetPassword(new ResetPasswordRequest(rawToken, "NewS3cure!Pass")));

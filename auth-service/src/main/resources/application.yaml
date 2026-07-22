@@ -22,7 +22,9 @@ refresh-token:
   expiration: 604800000
 
 password-reset-token:
-  expiration: 3600
+  expiration:
+    forgot: 3600
+    new-user: 3600
 
 logging:
     level:

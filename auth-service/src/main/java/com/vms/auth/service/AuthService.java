@@ -34,17 +34,20 @@ import java.util.UUID;
 @Slf4j
 public class AuthService {
 
-    @Value("${refresh-token.expiration}")
-    private long refreshTokenExpirationSeconds;
-
     private final UserRepository userRepository;
     private final RefreshTokenRepository refreshTokenRepository;
     private final PasswordResetTokenRepository passwordResetTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
 
-    @Value("${password-reset-token.expiration}")
-    private long passwordResetTokenExpirationSeconds;
+    @Value("${refresh-token.expiration}")
+    private long refreshTokenExpirationSeconds;
+
+    @Value("${password-reset-token.expiration.forgot}")
+    private long forgotPasswordResetTokenExpirationSeconds;
+
+    @Value("${password-reset-token.expiration.new-user}")
+    private long newUserPasswordResetTokenExpirationSeconds;
 
     @Transactional
     public void forgotPassword(ForgotPasswordRequest request) {
@@ -58,7 +61,8 @@ public class AuthService {
         String hashedToken = generateSHA256Hash(token);
         PasswordResetToken resetToken = new PasswordResetToken(
                 user, hashedToken,
-                Instant.now().plusSeconds(passwordResetTokenExpirationSeconds)
+                Instant.now().plusSeconds(forgotPasswordResetTokenExpirationSeconds),
+                "FORGOT_PASSWORD"
         );
         passwordResetTokenRepository.save(resetToken);
 
@@ -179,7 +183,7 @@ public class AuthService {
     }
 
     @Transactional
-    public AdminCreateUserResponse adminCreateUser(CreateUserRequest request) {
+    public void adminCreateUser(CreateUserRequest request) {
         log.info("Admin attempting to create user with email: {}", request.email());
         if (userRepository.existsByEmail(request.email())) {
             log.warn("User creation failed: Email already in use: {}", request.email());
@@ -197,9 +201,13 @@ public class AuthService {
                 false
         );
         user = userRepository.save(user);
-
+        passwordResetTokenRepository.save(new PasswordResetToken(
+                user,
+                generateSHA256Hash(tempPassword),
+                Instant.now().plusSeconds(newUserPasswordResetTokenExpirationSeconds),
+                "NEW_ACCOUNT_ACTIVATION"
+        ));
         log.info("User successfully created by Admin: {}", user.getEmail());
-        // TODO: Trigger email notification
-        return new AdminCreateUserResponse(toUserResponse(user), tempPassword);
+        // TODO: Trigger email notification with tempPassword
     }
 }
