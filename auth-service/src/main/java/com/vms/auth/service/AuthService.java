@@ -199,6 +199,7 @@ public class AuthService {
         user = userRepository.save(user);
 
         log.info("User successfully created by Admin: {}", user.getEmail());
+        // TODO: Trigger email notification
         return new AdminCreateUserResponse(toUserResponse(user), tempPassword);
     }
 }
