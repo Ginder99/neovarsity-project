@@ -23,11 +23,14 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
 import java.time.Instant;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -230,12 +233,12 @@ class AuthControllerTest {
                         .header("Authorization", "Bearer " + adminToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(createReq)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.user.email", is("newconsumer@example.com")))
-                .andExpect(jsonPath("$.user.name", is("New Consumer")))
-                .andExpect(jsonPath("$.user.role", is("CONSUMER")))
-                .andExpect(jsonPath("$.user.is_active", is(false)))
-                .andExpect(jsonPath("$.temp_password", startsWith("TEMP_")));
+                .andExpect(status().isNoContent());
+        Optional<User> userOpt = userRepository.findByEmail("newconsumer@example.com");
+        assertThat(userOpt).isPresent();
+        PasswordResetToken resetToken = passwordResetTokenRepository.findByUser(userOpt.get());
+        assertNotNull(resetToken);
+        assertEquals("NEW_ACCOUNT_ACTIVATION", resetToken.getPurpose());
     }
 
     @Test
@@ -273,6 +276,11 @@ class AuthControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNoContent());
         assertThat(passwordResetTokenRepository.count()).isEqualTo(1);
+        Optional<User> userOpt = userRepository.findById(response.user().id());
+        assertThat(userOpt).isPresent();
+        PasswordResetToken resetToken = passwordResetTokenRepository.findByUser(userOpt.get());
+        assertNotNull(resetToken);
+        assertEquals("FORGOT_PASSWORD", resetToken.getPurpose());
     }
 
     @Test
@@ -295,7 +303,7 @@ class AuthControllerTest {
 
         String rawToken = UUID.randomUUID().toString();
         String hashedToken = authService.generateSHA256Hash(rawToken);
-        passwordResetTokenRepository.save(new PasswordResetToken(user, hashedToken, Instant.now().plusSeconds(3600)));
+        passwordResetTokenRepository.save(new PasswordResetToken(user, hashedToken, Instant.now().plusSeconds(3600), "FORGOT_PASSWORD"));
 
         ResetPasswordRequest request = new ResetPasswordRequest(rawToken, "NewS3cure!Pass");
 

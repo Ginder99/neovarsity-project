@@ -25,16 +25,20 @@ public class PasswordResetToken {
     @Column(name = "token_hash", nullable = false, unique = true)
     private String tokenHash;
 
+    @Column(name = "purpose", nullable = false)
+    private String purpose;
+
     @Column(name = "expires_at", nullable = false)
     private Instant expiresAt;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
-    public PasswordResetToken(User user, String tokenHash, Instant expiresAt) {
+    public PasswordResetToken(User user, String tokenHash, Instant expiresAt, String purpose) {
         this.user = user;
         this.tokenHash = tokenHash;
         this.expiresAt = expiresAt;
+        this.purpose = purpose;
     }
 
     @PrePersist

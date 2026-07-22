@@ -1,6 +1,8 @@
 package com.vms.auth.repository;
 
 import com.vms.auth.entity.PasswordResetToken;
+import com.vms.auth.entity.User;
+import org.jspecify.annotations.Nullable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -10,4 +12,5 @@ import java.util.Optional;
 public interface PasswordResetTokenRepository extends JpaRepository<PasswordResetToken, Long> {
     Optional<PasswordResetToken> findByTokenHash(String tokenHash);
     void deleteByUserId(Long userId);
+    PasswordResetToken findByUser(User user);
 }
