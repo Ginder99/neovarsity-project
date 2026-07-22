@@ -4,11 +4,13 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.jspecify.annotations.Nullable;
 
 import java.time.Instant;
 
 @Getter
+@Setter
 @Entity
 @NoArgsConstructor
 @Table(name = "users")
