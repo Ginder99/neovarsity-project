@@ -28,5 +28,5 @@ password-reset-token:
 
 logging:
     level:
-        com.vms.auth: ERROR
+        com.vms.auth: INFO
         org.springframework.web: ERROR

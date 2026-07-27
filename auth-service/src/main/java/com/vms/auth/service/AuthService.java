@@ -54,7 +54,9 @@ public class AuthService {
         log.info("Attempting to initiate password reset for email: {}", request.email());
         User user = userRepository.findByEmail(request.email())
                 .orElseThrow(() -> new RecordNotFoundException("Email"));
-
+        if (!user.getIsActive()) {
+            throw new AccountInactiveException();
+        }
         passwordResetTokenRepository.deleteByUserId(user.getId());
 
         String token = UUID.randomUUID().toString();
@@ -84,7 +86,8 @@ public class AuthService {
         }
 
         User user = resetToken.getUser();
-        user.setPasswordHash(passwordEncoder.encode(request.newPassword())); // This needs a setter in User entity if it doesn't exist
+        user.setPasswordHash(passwordEncoder.encode(request.newPassword()));
+        if("NEW_ACCOUNT_ACTIVATION".equals(resetToken.getPurpose())) user.setIsActive(true);
         userRepository.save(user);
 
         passwordResetTokenRepository.delete(resetToken);
@@ -207,7 +210,7 @@ public class AuthService {
                 Instant.now().plusSeconds(newUserPasswordResetTokenExpirationSeconds),
                 "NEW_ACCOUNT_ACTIVATION"
         ));
-        log.info("User successfully created by Admin: {}", user.getEmail());
+        log.info("User successfully created by Admin. Email: {} with token: {}", user.getEmail(), tempPassword);
         // TODO: Trigger email notification with tempPassword
     }
 }
