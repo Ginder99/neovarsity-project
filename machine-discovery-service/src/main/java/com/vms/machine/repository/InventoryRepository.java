@@ -1,6 +1,6 @@
-package com.vms.machine_discovery.repository;
+package com.vms.machine.repository;
 
-import com.vms.machine_discovery.entity.MachineInventory;
+import com.vms.machine.entity.MachineInventory;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

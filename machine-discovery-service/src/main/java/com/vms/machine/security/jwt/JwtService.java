@@ -1,4 +1,4 @@
-package com.vms.machine_discovery.security.jwt;
+package com.vms.machine.security.jwt;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

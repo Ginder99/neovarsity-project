@@ -1,7 +1,7 @@
-package com.vms.machine_discovery.service;
+package com.vms.machine.service;
 
-import com.vms.machine_discovery.entity.MachineInventory;
-import com.vms.machine_discovery.repository.InventoryRepository;
+import com.vms.machine.entity.MachineInventory;
+import com.vms.machine.repository.InventoryRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 

@@ -1,6 +1,6 @@
 spring:
   application:
-    name: machine-discovery-service
+    name: machine-service
   datasource:
     url: jdbc:mysql://localhost:3306/vms_db
     username: ${DB_USER:application_user}

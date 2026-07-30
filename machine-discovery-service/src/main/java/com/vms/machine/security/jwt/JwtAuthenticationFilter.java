@@ -1,4 +1,4 @@
-package com.vms.machine_discovery.security.jwt;
+package com.vms.machine.security.jwt;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

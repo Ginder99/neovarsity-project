@@ -1,6 +1,6 @@
-package com.vms.machine_discovery.security;
+package com.vms.machine.security;
 
-import com.vms.machine_discovery.security.jwt.JwtAuthenticationFilter;
+import com.vms.machine.security.jwt.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;

@@ -1,13 +1,13 @@
-package com.vms.machine_discovery;
+package com.vms.machine;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class MachineDiscoveryApplication {
+public class MachineApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(MachineDiscoveryApplication.class, args);
+		SpringApplication.run(MachineApplication.class, args);
 	}
 
 }

@@ -1,7 +1,7 @@
-package com.vms.machine_discovery.controller;
+package com.vms.machine.controller;
 
-import com.vms.machine_discovery.entity.Machine;
-import com.vms.machine_discovery.service.MachineService;
+import com.vms.machine.entity.Machine;
+import com.vms.machine.service.MachineService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

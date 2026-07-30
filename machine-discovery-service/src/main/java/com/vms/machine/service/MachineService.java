@@ -1,7 +1,7 @@
-package com.vms.machine_discovery.service;
+package com.vms.machine.service;
 
-import com.vms.machine_discovery.entity.Machine;
-import com.vms.machine_discovery.repository.MachineRepository;
+import com.vms.machine.entity.Machine;
+import com.vms.machine.repository.MachineRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 

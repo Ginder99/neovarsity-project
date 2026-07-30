@@ -1,4 +1,4 @@
-package com.vms.machine_discovery.security;
+package com.vms.machine.security;
 
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.core.AuthenticationException;

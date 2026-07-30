@@ -1,7 +1,7 @@
-package com.vms.machine_discovery.controller;
+package com.vms.machine.controller;
 
-import com.vms.machine_discovery.entity.MachineInventory;
-import com.vms.machine_discovery.service.InventoryService;
+import com.vms.machine.entity.MachineInventory;
+import com.vms.machine.service.InventoryService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;

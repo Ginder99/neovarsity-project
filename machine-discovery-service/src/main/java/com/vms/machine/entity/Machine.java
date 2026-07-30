@@ -1,4 +1,4 @@
-package com.vms.machine_discovery.entity;
+package com.vms.machine.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
