@@ -12,6 +12,9 @@ on:
       - 'auth-service/**'
       - '.github/workflows/auth-service-ci-cd.yml'
 
+permissions:
+  contents: read
+
 jobs:
   test:
     name: Run auth-service tests
