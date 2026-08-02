@@ -1,4 +1,4 @@
-package com.vms.machine.controller;
+package com.vms.machine.api;
 
 import com.vms.machine.entity.Machine;
 import com.vms.machine.service.MachineService;

@@ -1,4 +1,4 @@
-package com.vms.machine.controller;
+package com.vms.machine.api;
 
 import com.vms.machine.entity.MachineInventory;
 import com.vms.machine.service.InventoryService;
@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/machines/{id}/inventory")
+@RequestMapping("/api/v1/machines/{id}/inventory")
 public class InventoryController {
 
     private final InventoryService inventoryService;
