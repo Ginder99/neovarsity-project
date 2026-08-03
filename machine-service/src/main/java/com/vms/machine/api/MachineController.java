@@ -2,6 +2,7 @@ package com.vms.machine.api;
 
 import com.vms.machine.dto.CreateMachineRequest;
 import com.vms.machine.dto.MachineResponse;
+import com.vms.machine.dto.NearbyMachinesResponse;
 import com.vms.machine.entity.Machine;
 import com.vms.machine.service.MachineService;
 import jakarta.validation.Valid;
@@ -30,14 +31,14 @@ public class MachineController {
     }
 
     @GetMapping("/nearby")
-    public ResponseEntity<List<MachineResponse>> findNearby(
-            @RequestHeader double lat,
-            @RequestHeader double lng,
+    public ResponseEntity<NearbyMachinesResponse> findNearby(
+            @RequestParam double lat,
+            @RequestParam double lng,
             @RequestParam(required = false) Double radiusKm,
             @RequestParam(required = false) String cursor) {
 
-        List<MachineResponse> results = machineService.findNearbyMachines(lat, lng, radiusKm, cursor);
-        return ResponseEntity.ok(results);
+        NearbyMachinesResponse response = machineService.findNearbyMachines(lat, lng, radiusKm, cursor);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{id}")

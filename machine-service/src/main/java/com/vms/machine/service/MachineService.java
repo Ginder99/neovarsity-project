@@ -3,6 +3,7 @@ package com.vms.machine.service;
 import com.vms.machine.dto.CreateMachineRequest;
 import com.vms.machine.dto.MachineDistanceProjection;
 import com.vms.machine.dto.MachineResponse;
+import com.vms.machine.dto.NearbyMachinesResponse;
 import com.vms.machine.entity.Machine;
 import com.vms.machine.entity.MachineStatus;
 import com.vms.machine.repository.MachineRepository;
@@ -26,9 +27,9 @@ import java.util.stream.Collectors;
 public class MachineService {
 
     private static final int SRID = 4326;
-    private static final double MAX_RADIUS_KM = 25.0;
-    private static final double DEFAULT_RADIUS_KM = 5.0;
-    private static final int PAGE_SIZE = 20;
+    private static final double MAX_RADIUS_KM = 10.0;
+    private static final double DEFAULT_RADIUS_KM = 3.0;
+    private static final int PAGE_SIZE = 3;
     private static final double KM_PER_DEGREE = 111.0;
 
     private final MachineRepository machineRepository;
@@ -60,7 +61,7 @@ public class MachineService {
     }
 
     @Transactional
-    public List<MachineResponse> findNearbyMachines(double lat, double lng, Double radiusKmParam, String cursor) {
+    public NearbyMachinesResponse findNearbyMachines(double lat, double lng, Double radiusKmParam, String cursor) {
         double radiusKm = radiusKmParam == null ? DEFAULT_RADIUS_KM : radiusKmParam;
         if (radiusKm <= 0 || radiusKm > MAX_RADIUS_KM) {
             throw InvalidSearchRadiusException.outOfRange(radiusKm, MAX_RADIUS_KM);
@@ -70,13 +71,29 @@ public class MachineService {
         double radiusMeters = radiusKm * 1000;
         double radiusDegrees = radiusKm / KM_PER_DEGREE;
 
-        List<MachineDistanceProjection> results = machineRepository.findNearbyMachines(
-                lat, lng, radiusDegrees, radiusMeters, PAGE_SIZE, offset
+        // Fetch one extra row beyond the page size purely to detect whether
+        // a next page exists, without a separate COUNT(*) query.
+        List<MachineDistanceProjection> fetched = machineRepository.findNearbyMachines(
+                lat, lng, radiusDegrees, radiusMeters, PAGE_SIZE + 1, offset
         );
 
-        return results.stream()
+        boolean hasMore = fetched.size() > PAGE_SIZE;
+        List<MachineDistanceProjection> pageResults = hasMore
+                ? fetched.subList(0, PAGE_SIZE)
+                : fetched;
+
+        List<MachineResponse> machines = pageResults.stream()
                 .map(MachineResponse::fromProjection)
                 .collect(Collectors.toList());
+
+        String nextCursor = hasMore ? encodeCursor(offset + PAGE_SIZE) : null;
+
+        return new NearbyMachinesResponse(machines, nextCursor, hasMore);
+    }
+
+    private String encodeCursor(int offset) {
+        return Base64.getUrlEncoder().withoutPadding()
+                .encodeToString(String.valueOf(offset).getBytes());
     }
 
     private int decodeCursor(String cursor) {
