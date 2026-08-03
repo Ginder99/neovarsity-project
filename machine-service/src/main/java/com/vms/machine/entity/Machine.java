@@ -1,14 +1,15 @@
 package com.vms.machine.entity;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Data;
-
-import java.math.BigDecimal;
+import org.locationtech.jts.geom.Point;
 import java.time.LocalDateTime;
 
 @Entity
 @Data
 @Table(name = "vending_machines")
+@Builder
 public class Machine {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -16,10 +17,15 @@ public class Machine {
     private Long id;
     private String name;
     private String address;
-    @Column(name = "latitude", nullable = false, precision = 10, scale = 8)
-    private BigDecimal latitude;
-    @Column(name = "longitude", nullable = false, precision = 11, scale = 8)
-    private BigDecimal longitude;
-    private String status;
+    @Column(nullable = false)
+    private Double latitude;
+    @Column(nullable = false)
+    private Double longitude;
+    @Column(nullable = false, columnDefinition = "POINT SRID 4326")
+    private Point location;
+    @Enumerated(EnumType.STRING)
+    private MachineStatus status;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
     private LocalDateTime lastHeartbeatAt;
 }
