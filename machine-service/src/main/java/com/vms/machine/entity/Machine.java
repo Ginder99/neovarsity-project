@@ -4,7 +4,8 @@ import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Data;
 import org.locationtech.jts.geom.Point;
-import java.time.LocalDateTime;
+
+import java.time.Instant;
 
 @Entity
 @Data
@@ -25,7 +26,18 @@ public class Machine {
     private Point location;
     @Enumerated(EnumType.STRING)
     private MachineStatus status;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
-    private LocalDateTime lastHeartbeatAt;
+    private Instant createdAt;
+    private Instant updatedAt;
+    private Instant lastHeartbeatAt;
+
+    @PrePersist
+    public void onCreate() {
+        Instant now = Instant.now();
+        if (createdAt == null) {
+            createdAt = now;
+        }
+        if (updatedAt == null) {
+            updatedAt = now;
+        }
+    }
 }
