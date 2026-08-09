@@ -6,6 +6,7 @@ import com.vms.machine.dto.NearbyMachinesResponse;
 import com.vms.machine.entity.Machine;
 import com.vms.machine.service.MachineService;
 import jakarta.validation.Valid;
+import org.jspecify.annotations.Nullable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -28,6 +29,13 @@ public class MachineController {
     public ResponseEntity<MachineResponse> addMachine(@Valid @RequestBody CreateMachineRequest request) {
         MachineResponse response = machineService.addMachine(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @PostMapping("/bulk-load")
+    @PreAuthorize("hasRole('MACHINE_HANDLER')")
+    public ResponseEntity<Void> bulkLoad() {
+        machineService.bulkLoad();
+        return ResponseEntity.ok(null);
     }
 
     @GetMapping("/nearby")

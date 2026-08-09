@@ -10,13 +10,19 @@ import com.vms.machine.repository.MachineRepository;
 import com.vms.machine.service.exceptions.InvalidSearchRadiusException;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.PrecisionModel;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
@@ -69,12 +75,11 @@ public class MachineService {
 
         int offset = decodeCursor(cursor);
         double radiusMeters = radiusKm * 1000;
-        double radiusDegrees = radiusKm / KM_PER_DEGREE;
 
         // Fetch one extra row beyond the page size purely to detect whether
         // a next page exists, without a separate COUNT(*) query.
         List<MachineDistanceProjection> fetched = machineRepository.findNearbyMachines(
-                lat, lng, radiusDegrees, radiusMeters, PAGE_SIZE + 1, offset
+                lat, lng, radiusMeters, PAGE_SIZE + 1, offset
         );
 
         boolean hasMore = fetched.size() > PAGE_SIZE;
@@ -111,5 +116,28 @@ public class MachineService {
     public Optional<MachineResponse> getMachineById(String id) {
         log.info("Getting machine details for id: {}", id);
         return machineRepository.findById(id).map(MachineResponse::from);
+    }
+
+    public void bulkLoad() throws RuntimeException {
+        InputStream inputStream = getClass().getClassLoader().getResourceAsStream("test-data/vending_machines_test_data.csv");
+
+        try (InputStreamReader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+             CSVParser parser = CSVFormat.DEFAULT.builder()
+                     .setHeader() // reads first row as column names
+                     .setSkipHeaderRecord(true)
+                     .build()
+                     .parse(reader)) {
+
+            for (CSVRecord record : parser) {
+                String name = record.get("name");
+                String address = record.get("address");
+                double latitude = Double.parseDouble(record.get("latitude"));
+                double longitude = Double.parseDouble(record.get("longitude"));
+
+                addMachine(new CreateMachineRequest(name, address, latitude, longitude));
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

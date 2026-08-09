@@ -12,17 +12,18 @@ import java.util.List;
 @Repository
 public interface MachineRepository extends JpaRepository<Machine, String> {
     @Query(value = """
-            SELECT vm.id AS id, vm.name AS name, vm.address AS address, vm.latitude AS latitude, vm.longitude AS longitude,
-                vm.status AS status, ST_Distance_Sphere(vm.location, ST_SRID(POINT(:lng, :lat), 4326)) AS distanceMeters
-            FROM vending_machines vm
-            WHERE MBRContains(ST_Buffer(ST_SRID(POINT(:lng, :lat), 4326), :radiusDegrees), vm.location)
-            AND vm.status = 'ACTIVE'
-            HAVING distanceMeters <= :radiusMeters ORDER BY distanceMeters ASC LIMIT :limit OFFSET :offset
+                SELECT vm.id AS id, vm.name AS name, vm.address AS address, vm.latitude AS latitude, vm.longitude AS longitude,
+                    vm.status AS status, ST_Distance_Sphere(vm.location, ST_SRID(POINT(:lng, :lat), 4326)) AS distanceMeters
+                FROM vending_machines vm
+                WHERE MBRContains(ST_Buffer(ST_SRID(POINT(:lng, :lat), 4326), :radiusMeters), vm.location)
+                    AND vm.status = 'ONLINE'
+                HAVING distanceMeters <= :radiusMeters
+                ORDER BY distanceMeters ASC
+                LIMIT :limit OFFSET :offset
             """, nativeQuery = true)
     List<MachineDistanceProjection> findNearbyMachines(
             @Param("lat") double lat,
             @Param("lng") double lng,
-            @Param("radiusDegrees") double radiusDegrees,
             @Param("radiusMeters") double radiusMeters,
             @Param("limit") int limit,
             @Param("offset") int offset
