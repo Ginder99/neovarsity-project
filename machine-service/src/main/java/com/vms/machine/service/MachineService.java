@@ -16,7 +16,6 @@ import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.PrecisionModel;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
@@ -69,12 +68,11 @@ public class MachineService {
 
         int offset = decodeCursor(cursor);
         double radiusMeters = radiusKm * 1000;
-        double radiusDegrees = radiusKm / KM_PER_DEGREE;
 
         // Fetch one extra row beyond the page size purely to detect whether
         // a next page exists, without a separate COUNT(*) query.
         List<MachineDistanceProjection> fetched = machineRepository.findNearbyMachines(
-                lat, lng, radiusDegrees, radiusMeters, PAGE_SIZE + 1, offset
+                lat, lng, radiusMeters, PAGE_SIZE + 1, offset
         );
 
         boolean hasMore = fetched.size() > PAGE_SIZE;

@@ -20,7 +20,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
@@ -28,8 +27,6 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyDouble;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -163,13 +160,11 @@ class MachineServiceTest {
         double lng = -122.4194;
         
         // Default radius is 3.0 km.
-        // radiusDegrees = 3.0 / 111.0 = 0.027027027...
         // radiusMeters = 3.0 * 1000 = 3000.0
-        double expectedRadiusDegrees = 3.0 / 111.0;
         double expectedRadiusMeters = 3000.0;
 
         when(machineRepository.findNearbyMachines(
-                eq(lat), eq(lng), eq(expectedRadiusDegrees), eq(expectedRadiusMeters), eq(4), eq(0)
+                eq(lat), eq(lng), eq(expectedRadiusMeters), eq(4), eq(0)
         )).thenReturn(List.of());
 
         // Act
@@ -188,7 +183,6 @@ class MachineServiceTest {
         double lat = 37.7749;
         double lng = -122.4194;
         double radiusKm = 5.0;
-        double expectedRadiusDegrees = 5.0 / 111.0;
         double expectedRadiusMeters = 5000.0;
 
         List<MachineDistanceProjection> projections = List.of(
@@ -197,7 +191,7 @@ class MachineServiceTest {
         );
 
         when(machineRepository.findNearbyMachines(
-                eq(lat), eq(lng), eq(expectedRadiusDegrees), eq(expectedRadiusMeters), eq(4), eq(0)
+                eq(lat), eq(lng), eq(expectedRadiusMeters), eq(4), eq(0)
         )).thenReturn(projections);
 
         // Act
@@ -226,7 +220,6 @@ class MachineServiceTest {
         double lat = 37.7749;
         double lng = -122.4194;
         double radiusKm = 5.0;
-        double expectedRadiusDegrees = 5.0 / 111.0;
         double expectedRadiusMeters = 5000.0;
 
         // PAGE_SIZE is 3
@@ -237,7 +230,7 @@ class MachineServiceTest {
         );
 
         when(machineRepository.findNearbyMachines(
-                eq(lat), eq(lng), eq(expectedRadiusDegrees), eq(expectedRadiusMeters), eq(4), eq(0)
+                eq(lat), eq(lng), eq(expectedRadiusMeters), eq(4), eq(0)
         )).thenReturn(projections);
 
         // Act
@@ -256,7 +249,6 @@ class MachineServiceTest {
         double lat = 37.7749;
         double lng = -122.4194;
         double radiusKm = 5.0;
-        double expectedRadiusDegrees = 5.0 / 111.0;
         double expectedRadiusMeters = 5000.0;
 
         // Repository returns 4 rows (PAGE_SIZE + 1)
@@ -268,7 +260,7 @@ class MachineServiceTest {
         );
 
         when(machineRepository.findNearbyMachines(
-                eq(lat), eq(lng), eq(expectedRadiusDegrees), eq(expectedRadiusMeters), eq(4), eq(0)
+                eq(lat), eq(lng), eq(expectedRadiusMeters), eq(4), eq(0)
         )).thenReturn(projections);
 
         // Act
@@ -294,7 +286,6 @@ class MachineServiceTest {
         double lat = 37.7749;
         double lng = -122.4194;
         double radiusKm = 5.0;
-        double expectedRadiusDegrees = 5.0 / 111.0;
         double expectedRadiusMeters = 5000.0;
 
         // Encoded cursor of "3"
@@ -305,7 +296,7 @@ class MachineServiceTest {
         );
 
         when(machineRepository.findNearbyMachines(
-                eq(lat), eq(lng), eq(expectedRadiusDegrees), eq(expectedRadiusMeters), eq(4), eq(3)
+                eq(lat), eq(lng), eq(expectedRadiusMeters), eq(4), eq(3)
         )).thenReturn(projections);
 
         // Act
@@ -325,13 +316,12 @@ class MachineServiceTest {
         double lat = 37.7749;
         double lng = -122.4194;
         double radiusKm = 5.0;
-        double expectedRadiusDegrees = 5.0 / 111.0;
         double expectedRadiusMeters = 5000.0;
 
         String invalidCursor = "invalid_not_base_64_or_number!";
 
         when(machineRepository.findNearbyMachines(
-                eq(lat), eq(lng), eq(expectedRadiusDegrees), eq(expectedRadiusMeters), eq(4), eq(0)
+                eq(lat), eq(lng), eq(expectedRadiusMeters), eq(4), eq(0)
         )).thenReturn(List.of());
 
         // Act
