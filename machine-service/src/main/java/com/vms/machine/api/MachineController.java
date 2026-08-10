@@ -33,6 +33,13 @@ public class MachineController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    @PostMapping("{id}/enable")
+    @PreAuthorize("hasRole('MACHINE_HANDLER')")
+    public ResponseEntity<Void> enableMachine(@PathVariable Long id) {
+        machineService.enableMachine(id);
+        return ResponseEntity.ok().build();
+    }
+
     @GetMapping("/nearby")
     public ResponseEntity<NearbyMachinesResponse> findNearby(
             @RequestParam double lat,
@@ -45,7 +52,7 @@ public class MachineController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<MachineResponse> getMachine(@PathVariable String id) {
+    public ResponseEntity<MachineResponse> getMachine(@PathVariable Long id) {
         return machineService.getMachineById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());

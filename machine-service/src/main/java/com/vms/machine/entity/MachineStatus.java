@@ -5,4 +5,3 @@ public enum MachineStatus {
     OFFLINE,
     OUT_OF_ORDER
 }
- 

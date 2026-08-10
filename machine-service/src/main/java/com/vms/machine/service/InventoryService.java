@@ -1,5 +1,6 @@
 package com.vms.machine.service;
 
+import com.vms.machine.dto.AddInventoryRequest;
 import com.vms.machine.entity.MachineInventory;
 import com.vms.machine.repository.InventoryRepository;
 import com.vms.machine.repository.MachineRepository;
@@ -29,7 +30,7 @@ public class InventoryService {
         return inventoryRepository.findByMachineIdAndQuantityGreaterThan(machineId, 0);
     }
 
-    public void addInventory(String machineId, com.vms.machine.dto.AddInventoryRequest request) {
+    public void addInventory(Long machineId, AddInventoryRequest request) {
         log.info("Adding inventory to machine id: {}", machineId);
         var machine = machineRepository.findById(machineId).orElseThrow(() -> new RuntimeException("Machine not found"));
         var product = productRepository.findById(request.productId()).orElseThrow(() -> new RuntimeException("Product not found"));

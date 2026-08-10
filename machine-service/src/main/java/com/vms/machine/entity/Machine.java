@@ -1,16 +1,31 @@
 package com.vms.machine.entity;
 
-import jakarta.persistence.*;
-import lombok.Builder;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.Nullable;
 import org.locationtech.jts.geom.Point;
 
 import java.time.Instant;
 
 @Entity
 @Data
+@NoArgsConstructor
 @Table(name = "vending_machines")
-@Builder
 public class Machine {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,6 +44,19 @@ public class Machine {
     private Instant createdAt;
     private Instant updatedAt;
     private Instant lastHeartbeatAt;
+
+    public Machine(String name,
+                   String address,
+                   Point location,
+                   Double latitude,
+                   Double longitude) {
+        this.name = name;
+        this.address = address;
+        this.location = location;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.status = MachineStatus.OFFLINE;
+    }
 
     @PrePersist
     public void onCreate() {

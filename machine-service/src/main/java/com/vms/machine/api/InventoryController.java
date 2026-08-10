@@ -32,7 +32,7 @@ public class InventoryController {
 
     @PostMapping
     @PreAuthorize("hasRole('MACHINE_HANDLER')")
-    public ResponseEntity<Void> addInventory(@PathVariable String id, @RequestBody AddInventoryRequest request) {
+    public ResponseEntity<Void> addInventory(@PathVariable Long id, @RequestBody AddInventoryRequest request) {
         inventoryService.addInventory(id, request);
         return ResponseEntity.ok().build();
     }
