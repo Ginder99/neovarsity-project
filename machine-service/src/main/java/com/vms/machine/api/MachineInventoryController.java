@@ -2,7 +2,6 @@ package com.vms.machine.api;
 
 import com.vms.machine.dto.AddInventoryRequest;
 import com.vms.machine.dto.MachineInventoryResponse;
-import com.vms.machine.entity.MachineInventory;
 import com.vms.machine.service.InventoryService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -17,11 +16,11 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/machines/{id}/inventory")
-public class InventoryController {
+public class MachineInventoryController {
 
     private final InventoryService inventoryService;
 
-    public InventoryController(InventoryService inventoryService) {
+    public MachineInventoryController(InventoryService inventoryService) {
         this.inventoryService = inventoryService;
     }
 
