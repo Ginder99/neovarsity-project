@@ -28,4 +28,12 @@ public class ProductController {
         ProductResponse response = productService.addProduct(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
+
+    @PostMapping("/bulk-load")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> bulkLoad() {
+        productService.bulkLoad();
+        return ResponseEntity.ok(null);
+    }
+
 }

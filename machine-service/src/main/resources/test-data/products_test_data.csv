@@ -1,0 +1,51 @@
+name,description,category,image_url,base_price
+Velvet Cocoa Bar,"Smooth milk chocolate bar with a rich, velvety cocoa center.",CHOCOLATE,,40.00
+Almond Crunch Deluxe,Milk chocolate loaded with roasted almond pieces for a satisfying crunch.,CHOCOLATE,,55.00
+Midnight Dark 70%,Intense 70% dark chocolate bar for the serious cocoa lover.,CHOCOLATE,,65.00
+Hazelnut Swirl Bar,Creamy hazelnut praline swirled through smooth milk chocolate.,CHOCOLATE,,60.00
+Caramel Core Bar,"Chocolate bar with a gooey, slow-melting caramel core.",CHOCOLATE,,45.00
+Crispy Wafer Chocolate,Layers of crispy wafer coated in creamy milk chocolate.,CHOCOLATE,,30.00
+Triple Nut Delight,"A hearty mix of almonds, cashews, and pistachios set in dark chocolate.",CHOCOLATE,,70.00
+White Choc Berry Bar,White chocolate bar studded with tangy freeze-dried berries.,CHOCOLATE,,50.00
+Spicy Masala Chips,Crunchy potato chips tossed in a bold Indian masala spice blend.,CHIPS,,20.00
+Classic Salted Crisps,"Thin, crispy potato chips with a simple, satisfying salt finish.",CHIPS,,20.00
+Tangy Tomato Twist,"Potato chips coated in a zesty, tangy tomato seasoning.",CHIPS,,20.00
+Sour Cream & Onion Crunch,Classic sour cream and onion flavored potato crisps.,CHIPS,,25.00
+Peri Peri Potato Chips,Fiery peri peri seasoned chips with a citrusy kick.,CHIPS,,25.00
+Cheese Blast Nachos,Triangle corn nachos dusted with bold cheddar cheese powder.,CHIPS,,30.00
+BBQ Smoke Chips,Smoky barbecue flavored potato chips with a hint of sweetness.,CHIPS,,25.00
+Himalayan Salt Wafers,Light potato wafers finished with pink Himalayan rock salt.,CHIPS,,20.00
+Roasted Peanut Mix,"Lightly salted roasted peanuts, a classic on-the-go snack.",SNACK,,15.00
+Spiced Chana Crunch,Crunchy roasted chickpeas tossed in a mild spice mix.,SNACK,,15.00
+Multigrain Energy Bites,"Baked bites made from oats, millet, and honey for quick energy.",SNACK,,35.00
+Crunchy Corn Puffs,"Airy, cheese-flavored corn puffs that melt in your mouth.",SNACK,,15.00
+Masala Peanut Pouch,Crunchy fried peanuts coated in a spicy gram flour masala shell.,SNACK,,20.00
+Trail Mix Deluxe,"A mix of nuts, raisins, and dried cranberries for a wholesome bite.",SNACK,,45.00
+Baked Veggie Sticks,"Crispy baked sticks made from carrot, beetroot, and spinach.",SNACK,,30.00
+Sweet & Salty Popcorn,Butter popcorn with the perfect balance of sweet and salty notes.,SNACK,,25.00
+Chilled Cola Classic,"Ice-cold classic cola with a crisp, refreshing fizz.",BEVERAGE,,35.00
+Zesty Lemon Fizz,Sparkling lemon soda with a sharp citrus zing.,BEVERAGE,,30.00
+Mixed Fruit Punch,"A juicy blend of apple, orange, and grape flavors in one can.",BEVERAGE,,35.00
+Iced Peach Tea,"Chilled black tea infused with sweet, fragrant peach.",BEVERAGE,,40.00
+Sparkling Orange Soda,"Bright, bubbly orange soda bursting with citrus flavor.",BEVERAGE,,30.00
+Mango Tango Juice,"Thick, pulpy mango juice made for a hot afternoon.",BEVERAGE,,35.00
+Cold Brew Coffee Can,"Smooth, slow-steeped cold brew coffee, lightly sweetened.",BEVERAGE,,60.00
+Electrolyte Sports Drink,Isotonic sports drink to replenish electrolytes after a workout.,BEVERAGE,,40.00
+Ginger Zing Soda,"Spicy ginger ale with a warming, fizzy finish.",BEVERAGE,,35.00
+Berry Blast Smoothie,"Thick blended smoothie of strawberry, blueberry, and raspberry.",BEVERAGE,,55.00
+Pure Mineral Water,"Clean, purified mineral water in a resealable bottle.",WATER,,20.00
+Infused Cucumber Water,"Lightly infused water with a crisp, refreshing cucumber note.",WATER,,30.00
+Protein Shake Vanilla,Ready-to-drink vanilla protein shake with 20g of protein.,HEALTH,,80.00
+Green Detox Juice,"Cold-pressed blend of spinach, cucumber, and green apple.",HEALTH,,60.00
+Coconut Water Natural,"100% natural coconut water, no added sugar.",HEALTH,,45.00
+Oat Milk Latte Can,"Chilled oat milk latte with a smooth, dairy-free finish.",HEALTH,,65.00
+Fruit Gummy Bears,"Chewy, fruit-flavored gummy bears in assorted colors.",CANDY,,20.00
+Mint Chill Candies,Cool mint hard candies for an instant breath freshener.,CANDY,,10.00
+Toffee Caramel Bites,"Soft, chewy caramel toffee bites wrapped individually.",CANDY,,25.00
+Sour Blast Candy,"Tangy, sour-coated fruit candies with a sharp flavor punch.",CANDY,,15.00
+Chocolate Coated Raisins,Sweet raisins enrobed in a thin layer of milk chocolate.,CANDY,,30.00
+Instant Cup Noodles,"Spicy masala instant noodles, ready in just 3 minutes with hot water.",INSTANT_FOOD,,45.00
+Cheesy Popcorn Bucket,Ready-to-eat popcorn bucket loaded with cheddar cheese seasoning.,SNACK,,40.00
+Roasted Almonds Pack,"Premium roasted almonds, lightly salted for a healthy crunch.",HEALTH,,90.00
+Granola Energy Bar,"Oats, honey, and dried fruit pressed into a chewy energy bar.",HEALTH,,40.00
+Dark Roast Espresso Shot,Concentrated dark roast espresso shot in a compact can.,BEVERAGE,,50.00
