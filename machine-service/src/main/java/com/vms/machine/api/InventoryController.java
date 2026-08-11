@@ -1,6 +1,7 @@
 package com.vms.machine.api;
 
 import com.vms.machine.dto.AddInventoryRequest;
+import com.vms.machine.dto.MachineInventoryResponse;
 import com.vms.machine.entity.MachineInventory;
 import com.vms.machine.service.InventoryService;
 import org.springframework.http.ResponseEntity;
@@ -11,7 +12,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
 
 import java.util.List;
 
@@ -26,7 +26,7 @@ public class InventoryController {
     }
 
     @GetMapping
-    public ResponseEntity<List<MachineInventory>> getInventory(@PathVariable String id) {
+    public ResponseEntity<List<MachineInventoryResponse>> getInventory(@PathVariable String id) {
         return ResponseEntity.ok(inventoryService.getAvailableInventory(id));
     }
 
