@@ -56,15 +56,8 @@ class MachineServiceTest {
         Point location = geometryFactory.createPoint(new Coordinate(request.longitude(), request.latitude()));
         location.setSRID(4326);
 
-        Machine savedMachine = Machine.builder()
-                .id(100L)
-                .name(request.name())
-                .address(request.address())
-                .location(location)
-                .latitude(request.latitude())
-                .longitude(request.longitude())
-                .status(MachineStatus.ONLINE)
-                .build();
+        Machine savedMachine = new Machine(request.name(), request.address(), location, request.latitude(), request.longitude());
+        savedMachine.setId(100L);
 
         when(machineRepository.save(any(Machine.class))).thenReturn(savedMachine);
 
@@ -78,7 +71,7 @@ class MachineServiceTest {
         assertThat(response.address()).isEqualTo("123 Tech Street");
         assertThat(response.latitude()).isEqualTo(37.7749);
         assertThat(response.longitude()).isEqualTo(-122.4194);
-        assertThat(response.status()).isEqualTo("ONLINE");
+        assertThat(response.status()).isEqualTo("OFFLINE");
         assertThat(response.distanceMeters()).isNull();
 
         ArgumentCaptor<Machine> machineCaptor = ArgumentCaptor.forClass(Machine.class);
@@ -89,7 +82,7 @@ class MachineServiceTest {
         assertThat(captured.getAddress()).isEqualTo(request.address());
         assertThat(captured.getLatitude()).isEqualTo(request.latitude());
         assertThat(captured.getLongitude()).isEqualTo(request.longitude());
-        assertThat(captured.getStatus()).isEqualTo(MachineStatus.ONLINE);
+        assertThat(captured.getStatus()).isEqualTo(MachineStatus.OFFLINE);
         assertThat(captured.getLocation().getSRID()).isEqualTo(4326);
     }
 
@@ -97,19 +90,14 @@ class MachineServiceTest {
     void getMachineById_Found() {
         // Arrange
         Long machineId = 1L;
-        Machine machine = Machine.builder()
-                .id(machineId)
-                .name("Machine 1")
-                .address("Location 1")
-                .latitude(12.34)
-                .longitude(56.78)
-                .status(MachineStatus.ONLINE)
-                .build();
+        Machine machine = new Machine("Machine 1", "Location 1",
+                null, 12.34, 56.78);
+        machine.setId(machineId);
 
-        when(machineRepository.findById(String.valueOf(machineId))).thenReturn(Optional.of(machine));
+        when(machineRepository.findById(machineId)).thenReturn(Optional.of(machine));
 
         // Act
-        Optional<MachineResponse> result = machineService.getMachineById(String.valueOf(machineId));
+        Optional<MachineResponse> result = machineService.getMachineById(machineId);
 
         // Assert
         assertThat(result).isPresent();
@@ -117,13 +105,13 @@ class MachineServiceTest {
         assertThat(response.id()).isEqualTo(machineId);
         assertThat(response.name()).isEqualTo("Machine 1");
         assertThat(response.address()).isEqualTo("Location 1");
-        assertThat(response.status()).isEqualTo("ONLINE");
+        assertThat(response.status()).isEqualTo("OFFLINE");
     }
 
     @Test
     void getMachineById_NotFound() {
         // Arrange
-        String nonExistentId = "999";
+        Long nonExistentId = 999L;
         when(machineRepository.findById(nonExistentId)).thenReturn(Optional.empty());
 
         // Act

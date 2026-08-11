@@ -49,7 +49,7 @@ class InventoryControllerTest {
     @WithMockUser(roles = "MACHINE_HANDLER")
     void addInventory_Success() throws Exception {
         AddInventoryRequest request = new AddInventoryRequest(1L, "A1", BigDecimal.TEN, 10);
-        doNothing().when(inventoryService).addInventory(eq("1"), any(AddInventoryRequest.class));
+        doNothing().when(inventoryService).addInventory(eq(1L), any(AddInventoryRequest.class));
         
         mockMvc.perform(post("/api/v1/machines/1/inventory")
                 .contentType(MediaType.APPLICATION_JSON)

@@ -53,17 +53,19 @@ public class MachineService {
         );
         location.setSRID(SRID);
 
-        Machine machine = Machine.builder()
-                .name(request.name())
-                .address(request.address())
-                .location(location)
-                .latitude(request.latitude())
-                .longitude(request.longitude())
-                .status(MachineStatus.ONLINE)
-                .build();
+        Machine machine = new Machine(request.name(), request.address(), location, request.latitude(), request.longitude());
 
         Machine saved = machineRepository.save(machine);
         return MachineResponse.from(saved);
+    }
+
+
+    @Transactional
+    public void enableMachine(Long machineId) {
+        Machine machine = machineRepository.findById(machineId)
+                .orElseThrow(() -> new RuntimeException("Machine not found with id: " +machineId));
+        machine.setStatus(MachineStatus.ONLINE);
+        machineRepository.save(machine);
     }
 
     @Transactional
@@ -113,7 +115,7 @@ public class MachineService {
         }
     }
 
-    public Optional<MachineResponse> getMachineById(String id) {
+    public Optional<MachineResponse> getMachineById(Long id) {
         log.info("Getting machine details for id: {}", id);
         return machineRepository.findById(id).map(MachineResponse::from);
     }

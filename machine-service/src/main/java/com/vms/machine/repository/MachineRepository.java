@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface MachineRepository extends JpaRepository<Machine, String> {
+public interface MachineRepository extends JpaRepository<Machine, Long> {
     @Query(value = """
                 SELECT vm.id AS id, vm.name AS name, vm.address AS address, vm.latitude AS latitude, vm.longitude AS longitude,
                     vm.status AS status, ST_Distance_Sphere(vm.location, ST_SRID(POINT(:lng, :lat), 4326)) AS distanceMeters

@@ -5,7 +5,6 @@ import com.vms.machine.dto.MachineResponse;
 import com.vms.machine.dto.NearbyMachinesResponse;
 import com.vms.machine.service.MachineService;
 import jakarta.validation.Valid;
-import org.jspecify.annotations.Nullable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -34,6 +33,13 @@ public class MachineController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    @PostMapping("{id}/enable")
+    @PreAuthorize("hasRole('MACHINE_HANDLER')")
+    public ResponseEntity<Void> enableMachine(@PathVariable Long id) {
+        machineService.enableMachine(id);
+        return ResponseEntity.ok().build();
+    }
+
     @PostMapping("/bulk-load")
     @PreAuthorize("hasRole('MACHINE_HANDLER')")
     public ResponseEntity<Void> bulkLoad() {
@@ -53,7 +59,7 @@ public class MachineController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<MachineResponse> getMachine(@PathVariable String id) {
+    public ResponseEntity<MachineResponse> getMachine(@PathVariable Long id) {
         return machineService.getMachineById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());

@@ -7,6 +7,6 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface InventoryRepository extends JpaRepository<MachineInventory, String> {
+public interface InventoryRepository extends JpaRepository<MachineInventory, Long> {
     List<MachineInventory> findByMachineIdAndQuantityGreaterThan(String machineId, int quantity);
 }
