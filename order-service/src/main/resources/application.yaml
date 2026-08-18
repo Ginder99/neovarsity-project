@@ -7,19 +7,19 @@ spring:
       show-sql: false
   datasource:
     url: jdbc:mysql://localhost:3306/vms_db
-    username: ${DB_USER:application_user}
-    password: ${DB_PASSWORD:App_user_pwd}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
 server:
   port: 9003
 
 jwt:
-  secret: ${JWT_SECRET:this-is-a-big-secret-key-for-jwt-token-generation}
+  secret: ${JWT_SECRET}
   expiration-ms: 3600000
 
 internal-security:
-  service-secret: ${INTERNAL_SERVICE_SECRET:dingus}
+  service-secret: ${INTERNAL_SERVICE_SECRET}
 
 refresh-token:
   expiration: 604800000
