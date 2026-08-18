@@ -9,9 +9,11 @@ import com.vms.order.entity.QrCode;
 import com.vms.order.repository.InventoryRepository;
 import com.vms.order.repository.MachineRepository;
 import com.vms.order.repository.OrderRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,8 +22,10 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
+@Slf4j
 public class OrderService {
 
     private static final String STATUS_PENDING_PAYMENT = "pending_payment";
@@ -184,7 +188,17 @@ public class OrderService {
             case "failed", "refunded" -> STATUS_FAILED;
             default -> throw new ApiException(400, "INVALID_PAYMENT_STATUS", "Unsupported payment status");
         };
-        
+
+        if (Objects.equals(order.getStatus(), nextStatus)) {
+            log.info("Order {} already in status {}, treating as idempotent no-op", orderId, nextStatus);
+            return;
+        }
+        if (!Objects.equals(order.getStatus(), STATUS_PENDING_PAYMENT)) {
+            throw new InvalidOrderStateTransitionException(
+                    "Order " + orderId + " is in status " + order.getStatus() +
+                            ", cannot transition to " + nextStatus);
+        }
+
         order.setStatus(nextStatus);
         order.setUpdatedAt(Instant.now());
         

@@ -18,6 +18,9 @@ jwt:
   secret: ${JWT_SECRET:this-is-a-big-secret-key-for-jwt-token-generation}
   expiration-ms: 3600000
 
+internal-security:
+  service-secret: ${INTERNAL_SERVICE_SECRET:dingus}
+
 refresh-token:
   expiration: 604800000
 
