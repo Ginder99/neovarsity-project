@@ -18,6 +18,7 @@ jobs:
       service_path: auth-service
       cloudsql_instance: scalar-neovarsity-vms:us-central1:vms-db-instance
       secrets_mapping: "DB_PASSWORD=auth-db-user-password:latest,JWT_SECRET=jwt-secret:latest"
+      runtime_service_account: auth-service-runtime@scalar-neovarsity-vms.iam.gserviceaccount.com
     secrets:
       GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
       GCP_PROJECT_NUMBER: ${{ secrets.GCP_PROJECT_NUMBER }}
