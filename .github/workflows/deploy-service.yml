@@ -25,7 +25,7 @@ on:
 
 env:
   REGION: us-central1
-  REPO: my-services
+  REPO: vms-services
 
 jobs:
   deploy:
