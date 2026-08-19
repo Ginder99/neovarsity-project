@@ -12,7 +12,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
 
 server:
-    port: 9001
+    port: ${PORT:8080}
 
 jwt:
     secret: ${JWT_SECRET}
