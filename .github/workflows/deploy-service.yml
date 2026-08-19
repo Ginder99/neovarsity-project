@@ -63,5 +63,4 @@ jobs:
           image: ${{ env.REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ env.REPO }}/${{ inputs.service_name }}:${{ github.sha }}
           flags: >-
             ${{ inputs.cloudsql_instance != '' && format('--add-cloudsql-instances={0}', inputs.cloudsql_instance) || '' }}
-            --service-account=${{ inputs.runtime_service_account }}
           secrets: ${{ inputs.secrets_mapping }}
