@@ -12,24 +12,28 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 @RestControllerAdvice
 @Slf4j
 public class ApiExceptionHandler {
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiError> handleAuthException(Exception ex) {
         log.error("An unexpected error occurred: ", ex);
         ApiError error = new ApiError("INTERNAL_SERVER_ERROR", "An unexpected error occurred", HttpStatus.INTERNAL_SERVER_ERROR.value());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
     }
+
     @ExceptionHandler(NoResourceFoundException.class)
     public ResponseEntity<ApiError> handleNoResourceFoundException(NoResourceFoundException ex) {
         log.warn("Resource not found: {}", ex.getMessage());
         ApiError error = new ApiError("NOT_FOUND", "Resource not found", HttpStatus.NOT_FOUND.value());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
     }
+
     @ExceptionHandler(AuthException.class)
     public ResponseEntity<ApiError> handleAuthException(AuthException ex) {
         log.warn("Auth error occurred: {} - {}", ex.getCode(), ex.getMessage());
         ApiError error = new ApiError(ex.getCode(), ex.getMessage(), ex.getStatus().value());
         return ResponseEntity.status(ex.getStatus()).body(error);
     }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiError> handleInvalidArgumentException(MethodArgumentNotValidException ex) {
         log.warn("Invalid argument: {}", ex.getMessage());
