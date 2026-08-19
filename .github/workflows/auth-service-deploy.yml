@@ -1,0 +1,20 @@
+name: Deploy auth-service
+
+on:
+  push:
+    branches: [release]
+    paths:
+      - 'auth-service/**'
+      - '.github/workflows/auth-service-deploy.yml'
+
+jobs:
+  deploy:
+    uses: ./.github/workflows/deploy-service.yml
+    with:
+      service_name: auth-service
+      service_path: auth-service
+      cloudsql_instance: your-project-id:us-central1:auth-db-instance
+      secrets_mapping: "DB_PASSWORD=db-app-password:latest,JWT_SECRET=jwt-secret:latest"
+    secrets:
+      GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+      GCP_PROJECT_NUMBER: ${{ secrets.GCP_PROJECT_NUMBER }}
