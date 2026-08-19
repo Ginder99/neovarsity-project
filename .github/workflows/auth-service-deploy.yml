@@ -17,7 +17,7 @@ jobs:
       service_name: auth-service
       service_path: auth-service
       cloudsql_instance: your-project-id:us-central1:auth-db-instance
-      secrets_mapping: "DB_PASSWORD=db-app-password:latest,JWT_SECRET=jwt-secret:latest"
+      secrets_mapping: "DB_PASSWORD=auth-db-user-password:latest,JWT_SECRET=jwt-secret:latest"
     secrets:
       GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
       GCP_PROJECT_NUMBER: ${{ secrets.GCP_PROJECT_NUMBER }}
