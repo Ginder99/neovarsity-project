@@ -13,6 +13,10 @@ on:
         required: false
         type: string
         default: ""
+      runtime_service_account:
+        required: false
+        type: string
+        default: ""
       secrets_mapping:
         required: false
         type: string
