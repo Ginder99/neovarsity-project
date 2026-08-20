@@ -1,0 +1,26 @@
+name: Deploy payment-service
+
+on:
+  push:
+    branches: [release]
+    paths:
+      - 'payment-service/**'
+      - '.github/workflows/payment-service-deploy.yml'
+
+jobs:
+  deploy:
+    permissions:
+      contents: read
+      id-token: write
+    uses: ./.github/workflows/deploy-service.yml
+    with:
+      service_name: payment-service
+      service_path: payment-service
+      cloudsql_instance: scalar-neovarsity-vms:us-central1:vms-db-instance
+      secrets_mapping: "DB_PASSWORD=payment-db-user-password:latest,JWT_SECRET=jwt-secret:latest,INTERNAL_SERVICE_SECRET=payment-order-webhook-secret:latest,
+      STRIPE_SECRET_KEY=stripe-secret-key,STRIPE_WEBHOOK_SECRET=stripe-webhook-secret"
+      runtime_service_account: payment-service-runtime@scalar-neovarsity-vms.iam.gserviceaccount.com
+      env_vars: "ORDER_SERVICE_BASE_URL=${{ vars.ORDER_SERVICE_URL }}"
+    secrets:
+      GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+      GCP_PROJECT_NUMBER: ${{ secrets.GCP_PROJECT_NUMBER }}
