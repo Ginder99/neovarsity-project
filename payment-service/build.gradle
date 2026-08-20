@@ -31,7 +31,7 @@ dependencies {
 
 	// Stripe Java SDK
 	implementation 'com.stripe:stripe-java:29.0.0'
-
+	implementation 'com.google.cloud.sql:mysql-socket-factory-connector-j-8:1.28.6'
 	runtimeOnly 'com.mysql:mysql-connector-j'
 
 	compileOnly 'org.projectlombok:lombok'
