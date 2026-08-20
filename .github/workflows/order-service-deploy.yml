@@ -1,0 +1,24 @@
+name: Deploy order-service
+
+on:
+  push:
+    branches: [release]
+    paths:
+      - 'order-service/**'
+      - '.github/workflows/order-service-deploy.yml'
+
+jobs:
+  deploy:
+    permissions:
+      contents: read
+      id-token: write
+    uses: ./.github/workflows/deploy-service.yml
+    with:
+      service_name: order-service
+      service_path: order-service
+      cloudsql_instance: scalar-neovarsity-vms:us-central1:vms-db-instance
+      secrets_mapping: "DB_PASSWORD=order-db-user-password:latest,JWT_SECRET=jwt-secret:latest,INTERNAL_SERVICE_SECRET=payment-order-webhook-secret:latest"
+      runtime_service_account: order-service-runtime@scalar-neovarsity-vms.iam.gserviceaccount.com
+    secrets:
+      GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+      GCP_PROJECT_NUMBER: ${{ secrets.GCP_PROJECT_NUMBER }}
