@@ -21,6 +21,10 @@ on:
         required: false
         type: string
         default: ""
+      env_vars:
+        required: false
+        type: string
+        default: ""
     secrets:
       GCP_PROJECT_ID:
         required: true
