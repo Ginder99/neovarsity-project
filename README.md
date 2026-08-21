@@ -14,8 +14,8 @@ Java 21, Spring Boot, Spring Security, Spring Data JPA/Hibernate, MySQL/Google C
 ## API overview
 
 ### auth-service
-- `POST /api/v1/auth/signup` -> Create a user in the system and returns a JWT Token
-- `POST /api/v1/auth/login` -> Log a user into the system and returns a JWT Token
+- `POST /api/v1/auth/signup` -> Create a user in the system and returns a JWT Token and refresh token
+- `POST /api/v1/auth/login` -> Log a user into the system and returns a JWT Token and refresh token
 - `POST /api/v1/auth/refresh` -> Issue a fresh JWT based on the refresh token
 - `POST /api/v1/auth/admin/users` -> Create a user in the system in Pending state
 - `POST /api/v1/auth/forgot-password` -> Create a password reset token
