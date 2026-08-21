@@ -73,3 +73,4 @@ jobs:
             ${{ inputs.cloudsql_instance != '' && format('--add-cloudsql-instances={0}', inputs.cloudsql_instance) || '' }}
             --service-account=${{ inputs.runtime_service_account }}
           secrets: ${{ inputs.secrets_mapping }}
+          env_vars: ${{ inputs.env_vars }}
