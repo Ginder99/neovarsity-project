@@ -102,3 +102,5 @@ Logical tables represented by the entity classes include:
 - `qr_codes`
 - `payments`
 - `processed_webhook_event`
+
+Detailed schema design and Mermaid ER diagram are available in `/home/runner/work/neovarsity-project/neovarsity-project/DATABASE_SCHEMA.md`.
