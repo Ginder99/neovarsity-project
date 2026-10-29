@@ -1,0 +1,10 @@
+spring:
+  application:
+    name: notification-service
+
+server:
+  port: ${PORT:8080}
+
+sendgrid:
+  api-key: ${SENDGRID_API_KEY}
+  from-email: ${SENDGRID_FROM_EMAIL}

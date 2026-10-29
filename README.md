@@ -1,11 +1,12 @@
 # Vending Machine Management System
 
-Backend project implemented as four Spring Boot services:
+Backend project implemented as five Spring Boot services:
 
 - `auth-service` — users, roles, JWT access tokens, refresh tokens and password reset.
 - `machine-service` — vending machines, products, inventory and nearby-machine search.
 - `order-service` — orders, order state, signed QR payloads and dispensing.
 - `payment-service` — Stripe PaymentIntent creation, webhooks and order callbacks.
+- `notification-service` — SendGrid email notifications using file-based templates.
 
 ## Stack
 
@@ -44,6 +45,9 @@ Java 21, Spring Boot, Spring Security, Spring Data JPA/Hibernate, MySQL/Google C
 - `POST /api/v1/payments/create-intent` -> Create a payment intent on Stripe based on order ID
 - `POST /api/v1/payments/webhook/stripe` -> Webhook to process payment from Stripe (Called by Stripe)
 
+### notification-service
+- `POST /api/v1/notifications` -> Send a templated email notification through SendGrid
+
 ## Repository structure
 
 ```text
@@ -52,6 +56,7 @@ neovarsity-project/
 ├── machine-service/
 ├── order-service/
 ├── payment-service/
+├── notification-service/
 └── .github/workflows/
 ```
 
@@ -78,6 +83,8 @@ Sensitive configuration is externalized. Typical variables include:
 - `STRIPE_WEBHOOK_SECRET`
 - `INTERNAL_SERVICE_SECRET`
 - `ORDER_SERVICE_BASE_URL`
+- `SENDGRID_API_KEY`
+- `SENDGRID_FROM_EMAIL`
 
 ## Security
 
