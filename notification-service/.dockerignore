@@ -1,0 +1,8 @@
+.gradle
+build
+.git
+.gitignore
+gradle
+gradlew
+gradlew.bat
+src/test

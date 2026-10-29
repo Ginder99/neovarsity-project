@@ -1,0 +1,24 @@
+name: Deploy notification-service
+
+on:
+  push:
+    branches: [release]
+    paths:
+      - 'notification-service/**'
+      - '.github/workflows/notification-service-deploy.yml'
+
+jobs:
+  deploy:
+    permissions:
+      contents: read
+      id-token: write
+    uses: ./.github/workflows/deploy-service.yml
+    with:
+      service_name: notification-service
+      service_path: notification-service
+      secrets_mapping: "SENDGRID_API_KEY=sendgrid-api-key:latest"
+      runtime_service_account: notification-service-runtime@scalar-neovarsity-vms.iam.gserviceaccount.com
+      env_vars: "SENDGRID_FROM_EMAIL=${{ vars.SENDGRID_FROM_EMAIL }}"
+    secrets:
+      GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+      GCP_PROJECT_NUMBER: ${{ secrets.GCP_PROJECT_NUMBER }}
